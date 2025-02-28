@@ -1,0 +1,388 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+.tooltip-container {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  width: 100%;
+}
+
+.tooltip-content {
+  visibility: hidden;
+  opacity: 0;
+  width: 100%;
+  background-color: #333;
+  color: #fff;
+  text-align: left;
+  border-radius: 4px;
+  padding: 8px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%; /* Adjust position */
+  left: 50%;
+  transform: translateX(-50%);
+  transition: opacity 0.2s ease-in-out;
+  font-size: 12px;
+}
+
+.tooltip-container:hover .tooltip-content {
+  visibility: visible;
+  opacity: 1;
+}
+
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+}
+
+table {
+  width: 100%;
+  overflow: scroll;
+}
+.background {
+  background-color: black;
+}
+
+.main-section {
+  background-image: url('/assets/images/landing-page-bg.png');
+  background-position: center;
+  background-size: cover; /* Scales the image to cover the div */
+  width: 100%;
+}
+
+.price-plan-section {
+  background-image: url('/public/assets/images/price-bg.png');
+  background-size: cover;
+}
+
+.purple_svg
+{
+    background-color: #6E30BC;
+background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25'%3E%3Cdefs%3E%3ClinearGradient id='a' gradientUnits='userSpaceOnUse' x1='0' x2='0' y1='0' y2='100%25' gradientTransform='rotate(188,768,356)'%3E%3Cstop offset='0' stop-color='%236E30BC'/%3E%3Cstop offset='1' stop-color='%235916B1'/%3E%3C/linearGradient%3E%3Cpattern patternUnits='userSpaceOnUse' id='b' width='1942' height='1618.3' x='0' y='0' viewBox='0 0 1080 900'%3E%3Cg fill-opacity='0.04'%3E%3Cpolygon fill='%23444' points='90 150 0 300 180 300'/%3E%3Cpolygon points='90 150 180 0 0 0'/%3E%3Cpolygon fill='%23AAA' points='270 150 360 0 180 0'/%3E%3Cpolygon fill='%23DDD' points='450 150 360 300 540 300'/%3E%3Cpolygon fill='%23999' points='450 150 540 0 360 0'/%3E%3Cpolygon points='630 150 540 300 720 300'/%3E%3Cpolygon fill='%23DDD' points='630 150 720 0 540 0'/%3E%3Cpolygon fill='%23444' points='810 150 720 300 900 300'/%3E%3Cpolygon fill='%23FFF' points='810 150 900 0 720 0'/%3E%3Cpolygon fill='%23DDD' points='990 150 900 300 1080 300'/%3E%3Cpolygon fill='%23444' points='990 150 1080 0 900 0'/%3E%3Cpolygon fill='%23DDD' points='90 450 0 600 180 600'/%3E%3Cpolygon points='90 450 180 300 0 300'/%3E%3Cpolygon fill='%23666' points='270 450 180 600 360 600'/%3E%3Cpolygon fill='%23AAA' points='270 450 360 300 180 300'/%3E%3Cpolygon fill='%23DDD' points='450 450 360 600 540 600'/%3E%3Cpolygon fill='%23999' points='450 450 540 300 360 300'/%3E%3Cpolygon fill='%23999' points='630 450 540 600 720 600'/%3E%3Cpolygon fill='%23FFF' points='630 450 720 300 540 300'/%3E%3Cpolygon points='810 450 720 600 900 600'/%3E%3Cpolygon fill='%23DDD' points='810 450 900 300 720 300'/%3E%3Cpolygon fill='%23AAA' points='990 450 900 600 1080 600'/%3E%3Cpolygon fill='%23444' points='990 450 1080 300 900 300'/%3E%3Cpolygon fill='%23222' points='90 750 0 900 180 900'/%3E%3Cpolygon points='270 750 180 900 360 900'/%3E%3Cpolygon fill='%23DDD' points='270 750 360 600 180 600'/%3E%3Cpolygon points='450 750 540 600 360 600'/%3E%3Cpolygon points='630 750 540 900 720 900'/%3E%3Cpolygon fill='%23444' points='630 750 720 600 540 600'/%3E%3Cpolygon fill='%23AAA' points='810 750 720 900 900 900'/%3E%3Cpolygon fill='%23666' points='810 750 900 600 720 600'/%3E%3Cpolygon fill='%23999' points='990 750 900 900 1080 900'/%3E%3Cpolygon fill='%23999' points='180 0 90 150 270 150'/%3E%3Cpolygon fill='%23444' points='360 0 270 150 450 150'/%3E%3Cpolygon fill='%23FFF' points='540 0 450 150 630 150'/%3E%3Cpolygon points='900 0 810 150 990 150'/%3E%3Cpolygon fill='%23222' points='0 300 -90 450 90 450'/%3E%3Cpolygon fill='%23FFF' points='0 300 90 150 -90 150'/%3E%3Cpolygon fill='%23FFF' points='180 300 90 450 270 450'/%3E%3Cpolygon fill='%23666' points='180 300 270 150 90 150'/%3E%3Cpolygon fill='%23222' points='360 300 270 450 450 450'/%3E%3Cpolygon fill='%23FFF' points='360 300 450 150 270 150'/%3E%3Cpolygon fill='%23444' points='540 300 450 450 630 450'/%3E%3Cpolygon fill='%23222' points='540 300 630 150 450 150'/%3E%3Cpolygon fill='%23AAA' points='720 300 630 450 810 450'/%3E%3Cpolygon fill='%23666' points='720 300 810 150 630 150'/%3E%3Cpolygon fill='%23FFF' points='900 300 810 450 990 450'/%3E%3Cpolygon fill='%23999' points='900 300 990 150 810 150'/%3E%3Cpolygon points='0 600 -90 750 90 750'/%3E%3Cpolygon fill='%23666' points='0 600 90 450 -90 450'/%3E%3Cpolygon fill='%23AAA' points='180 600 90 750 270 750'/%3E%3Cpolygon fill='%23444' points='180 600 270 450 90 450'/%3E%3Cpolygon fill='%23444' points='360 600 270 750 450 750'/%3E%3Cpolygon fill='%23999' points='360 600 450 450 270 450'/%3E%3Cpolygon fill='%23666' points='540 600 630 450 450 450'/%3E%3Cpolygon fill='%23222' points='720 600 630 750 810 750'/%3E%3Cpolygon fill='%23FFF' points='900 600 810 750 990 750'/%3E%3Cpolygon fill='%23222' points='900 600 990 450 810 450'/%3E%3Cpolygon fill='%23DDD' points='0 900 90 750 -90 750'/%3E%3Cpolygon fill='%23444' points='180 900 270 750 90 750'/%3E%3Cpolygon fill='%23FFF' points='360 900 450 750 270 750'/%3E%3Cpolygon fill='%23AAA' points='540 900 630 750 450 750'/%3E%3Cpolygon fill='%23FFF' points='720 900 810 750 630 750'/%3E%3Cpolygon fill='%23222' points='900 900 990 750 810 750'/%3E%3Cpolygon fill='%23222' points='1080 300 990 450 1170 450'/%3E%3Cpolygon fill='%23FFF' points='1080 300 1170 150 990 150'/%3E%3Cpolygon points='1080 600 990 750 1170 750'/%3E%3Cpolygon fill='%23666' points='1080 600 1170 450 990 450'/%3E%3Cpolygon fill='%23DDD' points='1080 900 1170 750 990 750'/%3E%3C/g%3E%3C/pattern%3E%3C/defs%3E%3Crect x='0' y='0' fill='url(%23a)' width='100%25' height='100%25'/%3E%3Crect x='0' y='0' fill='url(%23b)' width='100%25' height='100%25'/%3E%3C/svg%3E");
+background-attachment: fixed;
+background-size: cover;
+}
+
+
+.wrapper {
+  width: 100%;
+  max-width: 1536px;
+  margin-inline: auto;
+  height: 50px;
+  align-items: center;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes scrollLeft {
+  to {
+    left: -400px;
+  }
+}
+
+.itemLeft {
+  width: 400px;
+  border-radius: 6px;
+  position: absolute;
+  animation-timing-function: linear;
+  animation-duration: 30s;
+  animation-iteration-count: infinite;
+  font-size: 14px;
+  color: white;
+}
+
+.itemLeft {
+  left: max(calc(400px * 6), 100%);
+  animation-name: scrollLeft;
+}
+
+.item1 {
+  animation-delay: calc(30s / 6 * (6 - 1) * -1);
+}
+
+.item2 {
+  animation-delay: calc(30s / 6 * (6 - 2) * -1);
+}
+
+.item3 {
+  animation-delay: calc(30s / 6 * (6 - 3) * -1);
+}
+
+.item4 {
+  animation-delay: calc(30s / 6 * (6 - 4) * -1);
+}
+
+.item5 {
+  animation-delay: calc(30s / 6 * (6 - 5) * -1);
+}
+
+.item6 {
+  animation-delay: calc(30s / 6 * (6 - 6) * -1);
+}
+/* 
+.item7 {
+  animation-delay: calc(30s / 8 * (8 - 7) * -1);
+}
+
+.item8 {
+  animation-delay: calc(30s / 8 * (8 - 8) * -1);
+} */
+.nav_link {
+  display: inline-block;
+  padding-bottom: 2px;
+  background-image: linear-gradient(#7e3af2 0 0);
+  background-position: 0 100%;
+  background-size: 0% 1.5px;
+  background-repeat: no-repeat;
+  transition: background-size 0.5s, background-position 0s 0.5s; /*change after the size immediately*/
+}
+
+.nav_link_colored {
+  display: inline-block;
+  padding-bottom: 2px;
+  background-image: linear-gradient(#7e3af2 0 0);
+  background-position: 0 100%;
+  background-size: 0% 1.5px;
+  background-repeat: no-repeat;
+  transition: background-size 0.5s, background-position 0s 0.5s; /*change after the size immediately*/
+}
+
+.hero_bg {
+  background: radial-gradient(circle at 50% 50%, #fcf1ff 25%, transparent 50%), 
+  radial-gradient(circle at 70% 40%, #f8f0ff 20%, transparent 50%), 
+  radial-gradient(circle at 30% 60%, #f5ebf2 20%, transparent 50%), 
+  radial-gradient(circle at 80% 80%, #f0eaff 15%, transparent 50%), 
+  /* radial-gradient(circle at 20% 20%, #ffeaf8 15%, transparent 50%),  */
+  radial-gradient(circle at 50% 50%, #ffffff 70%, transparent 100%);
+background-color: #ffffff; /* Predominantly white background */
+}
+
+.fading_edge {
+  position: relative;
+  background: your-background-color; /* Keep the original background color */
+}
+
+.fading_edge::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 50px; /* Adjust the height of the fading effect */
+  background: linear-gradient(to bottom, transparent, white);
+  pointer-events: none; /* Ensures the gradient doesn't interfere with interactions */
+}
+
+
+.nav_link:hover {
+  background-position: 100% 100%; /*OR bottom right*/
+  background-size: 100% 1.5px;
+}
+.nav_link_colored:hover {
+  background-position: 100% 100%; /*OR bottom right*/
+  background-size: 100% 1.5px;
+}
+.container {
+  width: calc(100vw - 272px);
+}
+.loadingContainer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+
+@media (max-width: 1280px) {
+  .container {
+    width: 100%;
+  }
+}
+
+.main-wrapper:hover,
+.main-wrapper:focus {
+  border: 2px solid #c3adff;
+}
+
+*::-webkit-scrollbar {
+  width: 0;
+}
+/* *::-webkit-scrollbar-thumb {
+  background-color: #eae5ff;
+  border-radius: 10px;
+} */
+.dashboardLogo {
+  filter: sepia(100%) saturate(300%) brightness(20%) hue-rotate(180deg);
+}
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: black;
+  -webkit-box-shadow: 0 0 0px 40rem #ffff inset;
+}
+.Toastify__toast--error {
+  border: 2px solid #eb5757;
+  border-radius: 15px !important;
+  background: #fae1e2 !important;
+}
+.Toastify__toast-icon {
+  width: 20px !important;
+}
+
+.Toastify__toast--success {
+  border: 2px solid #3a9ea5 !important;
+  border-radius: 15px !important;
+  background: #f0f9fa !important;
+}
+
+.Toastify__toast--warning {
+  border: 2px solid #e78326 !important;
+  border-radius: 15px !important;
+  background: #fadfc5 !important;
+}
+
+.Toastify__toast-body {
+  color: #444c63;
+  font-size: 16px;
+  padding-left: 20px;
+  line-height: 20px;
+  padding: 0;
+  width: 100%;
+  font-weight: 400;
+  min-height: 65px !important;
+  margin-left: 5px !important;
+}
+
+.custom-pagination-item[data-active='true'] {
+  background-color: #5f35d2;
+}
+.loading-text {
+  animation: flash 1.2s ease-in-out infinite;
+  font-size: 14px;
+}
+
+@keyframes flash {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.content {
+  scrollbar-width: thin;
+  scrollbar-color: #7a69e8 #fbfbfc;
+}
+
+/* Chrome, Edge, and Safari */
+.content::-webkit-scrollbar {
+  width: thin;
+}
+
+.content::-webkit-scrollbar-track {
+  background: #fbfbfc;
+  width: thin;
+}
+
+.content::-webkit-scrollbar-thumb {
+  background-color: #7a69e8;
+  border-radius: 6px;
+  border: 1px solid #7a69e8;
+}
+
+.content_div {
+  width: 350px;
+  height: 350px;
+  position: relative;
+  max-height: 90vh;
+  margin: 20px;
+  background: var(--white);
+  overflow: hidden;
+}
+
+.content_div_small {
+  width: 80vw;
+  height: 580px;
+  position: relative;
+  max-height: 90vh;
+  /* margin: 20px; */
+  background: var(--white);
+  overflow: hidden;
+}
+
+.section {
+  height: 50vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  scroll-snap-align: center;
+  perspective: 500px;
+}
+
+.content {
+  scroll-snap-type: y mandatory;
+}
+.multiline-truncate {
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Number of lines you want to show */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.multi-truncate {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.landing-page-image {
+  -webkit-animation: mover 2s infinite alternate;
+  animation: mover 2s infinite alternate;
+}
+@-webkit-keyframes mover {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-20px);
+  }
+}
+@keyframes mover {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-20px);
+  }
+}
