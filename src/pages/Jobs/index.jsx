@@ -148,17 +148,24 @@ const JobsPage = () => {
 
   // 🔹 Handle API response status
   useEffect(() => {
-    if (data?.statusCode !== "00") {
-      console.log("picked error: ", data?.statusCode);
-      message.error(data?.data?.statusMessage || "Failed to fetch jobs. Please try again later.");
+    if (!data) return; // Ensure data is available
+  
+    if (data.statusCode !== "00") {
+      console.log("❌ Picked error: ", data.statusCode);
       
-      // Set filteredJobs to an empty array if the status is not "00"
-      setFilteredJobs([]);
-    } else {
-      // If the status is "00", set filteredJobs to the fetched jobs data
-      setFilteredJobs(jobsData);
+      message.error(
+        data.statusMessage || "Failed to fetch jobs. Please try again later."
+      );
+  
+      setFilteredJobs([]); // Clear jobs on error
+      return;
+    }
+  
+    if (jobsData?.length) {
+      setFilteredJobs(jobsData); // Update state only if jobsData is valid
     }
   }, [data, jobsData]);
+  
 
   return (
     <div>
