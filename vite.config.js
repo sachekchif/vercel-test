@@ -8,4 +8,7 @@ export default defineConfig({
     'process.env': {},
   },
   plugins: [react()],
+  server: {
+    historyApiFallback: true, // Ensures proper routing
+  },
 })
