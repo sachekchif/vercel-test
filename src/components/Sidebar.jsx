@@ -52,20 +52,20 @@ const Sidebar = () => {
       {
         title: "MENU",
         items: [
-          { label: "Dashboard", href: "/dashboard", icon: <DashboardIcon /> },
+          { label: "Dashboard", href: "/outsource-apply/dashboard", icon: <DashboardIcon /> },
         ],
       },
       {
         title: "APPLICATIONS",
         items: [
-          { label: "All Requests", href: "/all-requests", icon: <AllRequestsIcon /> },
+          { label: "All Requests", href: "/outsource-apply/all-requests", icon: <AllRequestsIcon /> },
         ],
       },
       {
         title: "PROFILE",
         items: [
-          { label: "Profile", href: "/profile", icon: <ProfileIcon /> },
-          { label: "Sign Out", href: "/login", icon: <LogoutIcon /> },
+          { label: "Profile", href: "/outsource-apply/profile", icon: <ProfileIcon /> },
+          { label: "Sign Out", href: "/outsource-apply/login", icon: <LogoutIcon /> },
         ],
       },
     ],
@@ -73,23 +73,23 @@ const Sidebar = () => {
       {
         title: "MENU",
         items: [
-          { label: "Admin Dashboard", href: "/admin-dashboard", icon: <AdminDashboardIcon /> },
+          { label: "Admin Dashboard", href: "/outsource-apply/admin-dashboard", icon: <AdminDashboardIcon /> },
         ],
       },
       {
         title: "APPLICATIONS",
         items: [
-          { label: "All Requests", href: "/ad-all-requests", icon: <AllRequestsIcon /> },
-          { label: "All Users", href: "/all_users", icon: <AllUsersIcon /> },
-          { label: "All Staff", href: "/all_staff", icon: <AllStaffIcon /> },
+          { label: "All Requests", href: "/outsource-apply/ad-all-requests", icon: <AllRequestsIcon /> },
+          { label: "All Users", href: "/outsource-apply/all_users", icon: <AllUsersIcon /> },
+          { label: "All Staff", href: "/outsource-apply/all_staff", icon: <AllStaffIcon /> },
         ],
       },
       {
         title: "PROFILE",
         items: [
-          { label: "Activities", href: "/activities", icon: <ActivitiesIcon /> },
-          { label: "Profile", href: "/profile", icon: <ProfileIcon /> },
-          { label: "Sign Out", href: "/login", icon: <LogoutIcon /> },
+          { label: "Activities", href: "/outsource-apply/activities", icon: <ActivitiesIcon /> },
+          { label: "Profile", href: "/outsource-apply/profile", icon: <ProfileIcon /> },
+          { label: "Sign Out", href: "/outsource-apply/login", icon: <LogoutIcon /> },
         ],
       },
     ],
@@ -97,24 +97,24 @@ const Sidebar = () => {
       {
         title: "MENU",
         items: [
-          { label: "Admin Dashboard", href: "/admin-dashboard", icon: <AdminDashboardIcon /> },
+          { label: "Admin Dashboard", href: "/outsource-apply/admin-dashboard", icon: <AdminDashboardIcon /> },
         ],
       },
       {
         title: "APPLICATIONS",
         items: [
-          { label: "All Requests", href: "/ad-all-requests", icon: <AllRequestsIcon /> },
-          { label: "All Users", href: "/all-users", icon: <AllUsersIcon /> },
-          { label: "All Staff", href: "/all-staff", icon: <AllStaffIcon /> },
+          { label: "All Requests", href: "/outsource-apply/ad-all-requests", icon: <AllRequestsIcon /> },
+          { label: "All Users", href: "/outsource-apply/all-users", icon: <AllUsersIcon /> },
+          { label: "All Staff", href: "/outsource-apply/all-staff", icon: <AllStaffIcon /> },
           // { label: "All Transactions", href: "/all-transactions", icon: <AllRequestsIcon /> }, // Example icon for transactions
         ],
       },
       {
         title: "PROFILE",
         items: [
-          { label: "Activities", href: "/activities", icon: <ActivitiesIcon /> },
-          { label: "Profile", href: "/profile", icon: <ProfileIcon /> },
-          { label: "Sign Out", href: "/login", icon: <LogoutIcon /> },
+          { label: "Activities", href: "/outsource-apply/activities", icon: <ActivitiesIcon /> },
+          { label: "Profile", href: "/outsource-apply/profile", icon: <ProfileIcon /> },
+          { label: "Sign Out", href: "/outsource-apply/login", icon: <LogoutIcon /> },
         ],
       },
     ],
@@ -122,24 +122,24 @@ const Sidebar = () => {
       {
         title: "MENU",
         items: [
-          { label: "Admin Dashboard", href: "/admin-dashboard", icon: <AdminDashboardIcon /> },
+          { label: "Admin Dashboard", href: "/outsource-apply/admin-dashboard", icon: <AdminDashboardIcon /> },
         ],
       },
       {
         title: "APPLICATIONS",
         items: [
-          { label: "All Requests", href: "/ad-all-requests", icon: <AllRequestsIcon /> },
-          { label: "All Users", href: "/all-users", icon: <AllUsersIcon /> },
-          { label: "All Staff", href: "/all-staff", icon: <AllStaffIcon /> },
+          { label: "All Requests", href: "/outsource-apply/ad-all-requests", icon: <AllRequestsIcon /> },
+          { label: "All Users", href: "/outsource-apply/all-users", icon: <AllUsersIcon /> },
+          { label: "All Staff", href: "/outsource-apply/all-staff", icon: <AllStaffIcon /> },
           // { label: "All Transactions", href: "/all-transactions", icon: <AllRequestsIcon /> }, // Example icon for transactions
         ],
       },
       {
         title: "PROFILE",
         items: [
-          { label: "Activities", href: "/activities", icon: <ActivitiesIcon /> },
-          { label: "Profile", href: "/profile", icon: <ProfileIcon /> },
-          { label: "Sign Out", href: "/login", icon: <LogoutIcon /> },
+          { label: "Activities", href: "/outsource-apply/activities", icon: <ActivitiesIcon /> },
+          { label: "Profile", href: "/outsource-apply/profile", icon: <ProfileIcon /> },
+          { label: "Sign Out", href: "/outsource-apply/login", icon: <LogoutIcon /> },
         ],
       },
     ],

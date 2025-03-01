@@ -1,12 +1,12 @@
 {
-  "name": "outsource-apply-two",
+  "name": "outsource-apply",
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "/",
+  "homepage": "/outsource-apply",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build --base=/outsource-apply/",
     "lint": "eslint .",
     "preview": "vite preview",
     "predeploy": "npm run build",
@@ -21,6 +21,7 @@
     "browser-image-compression": "^2.0.2",
     "dayjs": "^1.11.13",
     "js-cookie": "^3.0.5",
+    "outsource-apply": "file:",
     "outsource-apply-two": "file:",
     "react": "^18.3.1",
     "react-content-loader": "^7.0.2",

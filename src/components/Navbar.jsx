@@ -10,15 +10,15 @@ import NewJobRequestModal from "./Requests/NewJobRequestModal";
 import { logout } from "../utils/constants";
 
 const navItems = [
-  { title: "Home", href: "/" },
-  { title: "All Jobs", href: "/alljobs" },
-  { title: "Pricing", href: "/pricing" },
-  { title: "About Us", href: "/about" },
+  { title: "Home", href: "/outsource-apply" },
+  { title: "All Jobs", href: "/outsource-apply/alljobs" },
+  { title: "Pricing", href: "/outsource-apply/pricing" },
+  { title: "About Us", href: "/outsource-apply/about" },
   // { title: 'New Request', href: '#', modalTarget: 'new_request', modalToggle: 'new_request' },
 ];
 
-const LOGIN_URL = "/login";
-const SIGN_UP_URL = "/sign-up";
+const LOGIN_URL = "/outsource-apply/login";
+const SIGN_UP_URL = "/outsource-apply/sign-up";
 
 function Navbar() {
   const location = useLocation();

@@ -1,10 +1,11 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
+// https://vite.dev/config/
 export default defineConfig({
+  base: '/outsource-apply',
+  define: {
+    'process.env': {},
+  },
   plugins: [react()],
-  base: "/", // Ensures correct asset paths
-  server: {
-    historyApiFallback: true, // Ensures SPA fallback
-  }
-});
+})

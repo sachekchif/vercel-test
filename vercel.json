@@ -1,6 +1,5 @@
 {
-    "routes": [
-      { "src": "/", "dest": "/" }, {"src": "/test", "dest": "/"}
-    ]
-  }
-  
+  "rewrites": [
+    { "source": "/outsource-apply/(.*)", "destination": "/index.html" }
+  ]
+}

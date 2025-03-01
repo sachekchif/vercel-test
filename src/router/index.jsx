@@ -28,26 +28,26 @@ import SearchJobsPage from '../pages/Jobs/test-2';
 const AppRouter = () => (
   <Router>
     <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/pricing" element={<Pricing />} />
-      <Route path="/about" element={<About />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/profile" element={<Profile />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/recovery-mail" element={<RecoveryEmail />} />
-      <Route path="/verify-mail" element={<VerifyEmail />} />
-      <Route path="/success-page" element={<SuccessPage />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/alljobs" element={<JobsPage />} />
-      <Route path="/sign-up" element={<Signup />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/admin-dashboard" element={<AdminDashboard />} />
-      <Route path="/all-requests" element={<AllRequests />} />
-      <Route path="/ad-all-requests" element={<AdminRequest />} />
-      <Route path="/all-users" element={<AllUsers />} />
-      <Route path="/all-staff" element={<AllStaff />} />
-      <Route path="/checkout" element={<Checkout />} />
-      <Route path="/jobs/:jobTitle" element={<SearchJobsPage />} />
+      <Route path="/outsource-apply" element={<Home />} />
+      <Route path="/outsource-apply/pricing" element={<Pricing />} />
+      <Route path="/outsource-apply/about" element={<About />} />
+      <Route path="/outsource-apply/login" element={<Login />} />
+      <Route path="/outsource-apply/profile" element={<Profile />} />
+      <Route path="/outsource-apply/forgot-password" element={<ForgotPassword />} />
+      <Route path="/outsource-apply/recovery-mail" element={<RecoveryEmail />} />
+      <Route path="/outsource-apply/verify-mail" element={<VerifyEmail />} />
+      <Route path="/outsource-apply/success-page" element={<SuccessPage />} />
+      <Route path="/outsource-apply/reset-password" element={<ResetPassword />} />
+      <Route path="/outsource-apply/alljobs" element={<JobsPage />} />
+      <Route path="/outsource-apply/sign-up" element={<Signup />} />
+      <Route path="/outsource-apply/dashboard" element={<Dashboard />} />
+      <Route path="/outsource-apply/admin-dashboard" element={<AdminDashboard />} />
+      <Route path="/outsource-apply/all-requests" element={<AllRequests />} />
+      <Route path="/outsource-apply/ad-all-requests" element={<AdminRequest />} />
+      <Route path="/outsource-apply/all-users" element={<AllUsers />} />
+      <Route path="/outsource-apply/all-staff" element={<AllStaff />} />
+      <Route path="/outsource-apply/checkout" element={<Checkout />} />
+      <Route path="/outsource-apply/jobs/:jobTitle" element={<SearchJobsPage />} />
     </Routes>
   </Router>
 );
