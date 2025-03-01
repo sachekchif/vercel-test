@@ -3,6 +3,6 @@
     { "source": "/", "destination": "/outsource-apply", "permanent": true }
   ],
   "rewrites": [
-    { "source": "/outsource-apply(.*)", "destination": "/outsource-apply" }
+    { "source": "/outsource-apply(.*)", "destination": "index.html" }
   ]
 }
