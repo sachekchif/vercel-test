@@ -64,12 +64,12 @@ const LoginForm = () => {
 
         if (response?.profile?.role === "user") {
           setTimeout(() => {
-            navigate("/");
+            navigate("/outsource-apply");
           }, 3000);
         } else if (
           ["staff", "admin", "super_admin"].includes(response.profile.role)
         ) {
-          navigate("/admin-dashboard");
+          navigate("/outsource-apply/admin-dashboard");
         } else {
           toast.error("Invalid role. Please contact support.");
         }

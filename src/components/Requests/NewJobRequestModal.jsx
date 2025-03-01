@@ -87,7 +87,7 @@ const NewJobRequestModal = ({ isOpen, onClose, profile, job }) => {
     // Check subscription
     if (profile?.subscription === "free") {
       console.log("subs", profile.subscription);
-      navigate("/checkout");
+      navigate("/outsource-apply/checkout");
       return; // Exit the function
     }
 
@@ -114,20 +114,20 @@ const NewJobRequestModal = ({ isOpen, onClose, profile, job }) => {
     console.log("payload", payload);
     
 
-    // try {
-    //   const response = await createRequest(payload).unwrap();
-    //   if (response?.data?.statusCode === "00") {
-    //     message.error("File size must not exceed 1MB.");
-    //     navigate("/all-requests")
-    //     onClose(); // Close the modal on success
-    //   } else if (response.statusCode === "96") {
-    //     const message =
-    //       response?.data || response.statusMessage || "Unknown error.";
-    //     toast.error(message);
-    //   }
-    // } catch (err) {
-    //   toast.error("An error occurred while creating the request.");
-    // }
+    try {
+      const response = await createRequest(payload).unwrap();
+      if (response?.data?.statusCode === "00") {
+        message.error("File size must not exceed 1MB.");
+        navigate("/all-requests")
+        onClose(); // Close the modal on success
+      } else if (response.statusCode === "96") {
+        const message =
+          response?.data || response.statusMessage || "Unknown error.";
+        toast.error(message);
+      }
+    } catch (err) {
+      toast.error("An error occurred while creating the request.");
+    }
   
   };
 

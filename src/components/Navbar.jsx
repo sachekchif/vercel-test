@@ -63,11 +63,7 @@ function Navbar() {
 
   const handleMenuClick = ({ key }) => {
     if (key === "signout") {
-      sessionStorage.removeItem("userInformation");
-      sessionStorage.removeItem("access_token");
-      sessionStorage.removeItem("refresh_token");
-      setUser(null);
-      navigate("/login");
+      logout();
     }
   };
 
@@ -93,15 +89,15 @@ function Navbar() {
         </span>
       </div>
       <Menu.Item key="dashboard">
-        <Link to="/dashboard">Dashboard</Link>
+        <Link to="/outsource-apply/dashboard">Dashboard</Link>
       </Menu.Item>
       <Menu.Item key="requests">
-        <Link to="/all_requests">My Requests</Link>
+        <Link to="/outsource-apply/all-requests">My Requests</Link>
       </Menu.Item>
       <Menu.Item key="profile">
-        <Link to="/profile">Profile</Link>
+        <Link to="/outsource-apply/profile">Profile</Link>
       </Menu.Item>
-      <Menu.Item key="signout">Sign out</Menu.Item>
+      <Menu.Item key="/outsource-apply/login">Sign out</Menu.Item>
     </Menu>
   );
 

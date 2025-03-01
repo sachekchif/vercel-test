@@ -61,7 +61,7 @@ export const logout = () => {
   sessionStorage.removeItem("access_token");
   sessionStorage.removeItem("refresh_token");
 
-  navigate("/login"); // Redirect to login page
+  navigate("/outsource-apply/login"); // Redirect to login page
 };
 
 export const getDate = (inputDate) => {

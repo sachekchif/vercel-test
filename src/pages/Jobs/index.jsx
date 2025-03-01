@@ -1,11 +1,20 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Modal, Input, Button, Typography, Skeleton, Result, message } from "antd";
+import {
+  Modal,
+  Input,
+  Button,
+  Typography,
+  Skeleton,
+  Result,
+  message,
+} from "antd";
 import { CloseOutlined, EnvironmentOutlined } from "@ant-design/icons";
 import Navbar from "../../components/Navbar";
 import { useFetchAllJobsQuery } from "../../services/apiSlice";
 import { FcBriefcase } from "react-icons/fc";
 import NewJobReqModal from "../../components/Requests/NewJobRequestModal";
 import EmptyState from "../../assets/images/magnifier-with-path.svg";
+import { Link } from "react-router-dom";
 
 const JobsPage = () => {
   const jobRefs = useRef({});
@@ -149,23 +158,22 @@ const JobsPage = () => {
   // 🔹 Handle API response status
   useEffect(() => {
     if (!data) return; // Ensure data is available
-  
+
     if (data.statusCode !== "00") {
       console.log("❌ Picked error: ", data.statusCode);
-      
+
       message.error(
         data.statusMessage || "Failed to fetch jobs. Please try again later."
       );
-  
+
       setFilteredJobs([]); // Clear jobs on error
       return;
     }
-  
+
     if (jobsData?.length) {
       setFilteredJobs(jobsData); // Update state only if jobsData is valid
     }
   }, [data, jobsData]);
-  
 
   return (
     <div>
@@ -184,108 +192,108 @@ const JobsPage = () => {
             ref={sidebarContainerRef}
             className="overflow-y-auto max-h-[75vh] border-t"
           >
-            {isLoading
-              ? Array.from({ length: 5 }).map((_, index) => (
-                  <li key={index} className="p-3 border-b">
-                    <Skeleton active paragraph={{ rows: 1 }} />
-                  </li>
-                ))
-              : filteredJobs.length > 0
-              ? filteredJobs?.map((job) => (
-                  <li
-                    key={job.unique_id}
-                    ref={(el) => (sidebarRefs.current[job.unique_id] = el)}
-                    onClick={() => handleSidebarClick(job.unique_id)}
-                    className={`p-3 border-b cursor-pointer ${
-                      activeJobId === job.unique_id ? "bg-gray-200" : ""
-                    }`}
-                  >
-                    <h3 className="text-purple-900 font-bold">
-                      {job.cleaned_job_title}
-                    </h3>
-                    <Typography.Text className="text-sm text-gray-600">
-                      {job.city}, {job.state}
-                    </Typography.Text>
-                  </li>
-                ))
-              : (
-                  <li className="flex flex-col items-center justify-center p-5 text-black">
-                    <img
-                      src={EmptyState}
-                      alt="No jobs found"
-                      className="w-24 h-24 opacity-50"
-                    />
-                    <p className="mt-2 text-lg text-center font-semibold">
-                      Sorry, we were unable to find a matching job opening.
-                    </p>
-                    <p className="text-sm text-center text-gray-400">
-                      Don’t let that stop you. Try again, and narrow or broaden your
-                      search this time.
-                    </p>
-                  </li>
-                )}
+            {isLoading ? (
+              Array.from({ length: 5 }).map((_, index) => (
+                <li key={index} className="p-3 border-b">
+                  <Skeleton active paragraph={{ rows: 1 }} />
+                </li>
+              ))
+            ) : filteredJobs.length > 0 ? (
+              filteredJobs?.map((job) => (
+                <li
+                  key={job.unique_id}
+                  ref={(el) => (sidebarRefs.current[job.unique_id] = el)}
+                  onClick={() => handleSidebarClick(job.unique_id)}
+                  className={`p-3 border-b cursor-pointer ${
+                    activeJobId === job.unique_id ? "bg-gray-200" : ""
+                  }`}
+                >
+                  <h3 className="text-purple-900 font-bold">
+                    {job.cleaned_job_title}
+                  </h3>
+                  <Typography.Text className="text-sm text-gray-600">
+                    {job.city}, {job.state}
+                  </Typography.Text>
+                </li>
+              ))
+            ) : (
+              <li className="flex flex-col items-center justify-center p-5 text-black">
+                <img
+                  src={EmptyState}
+                  alt="No jobs found"
+                  className="w-24 h-24 opacity-50"
+                />
+                <p className="mt-2 text-lg text-center font-semibold">
+                  Sorry, we were unable to find a matching job opening.
+                </p>
+                <p className="text-sm text-center text-gray-400">
+                  Don’t let that stop you. Try again, and narrow or broaden your
+                  search this time.
+                </p>
+              </li>
+            )}
           </ul>
         </div>
 
         {/* 🔹 Job Details */}
         <div className="w-2/3 space-y-6 overflow-y-auto max-h-screen">
-          {isLoading
-            ? Array.from({ length: 3 }).map((_, index) => (
-                <div key={index} className="bg-white shadow-lg rounded-lg p-6">
-                  <Skeleton active />
+          {isLoading ? (
+            Array.from({ length: 3 }).map((_, index) => (
+              <div key={index} className="bg-white shadow-lg rounded-lg p-6">
+                <Skeleton active />
+              </div>
+            ))
+          ) : filteredJobs.length > 0 ? (
+            filteredJobs.map((job) => (
+              <div
+                key={job.unique_id}
+                ref={(el) => (jobRefs.current[job.unique_id] = el)}
+                data-id={job.unique_id}
+                className="bg-white shadow-lg rounded-lg p-6"
+              >
+                <h2 className="text-base flex gap-2 items-center font-semibold">
+                  <FcBriefcase /> {job.company}
+                </h2>
+                <h2 className="text-lg font-bold">{job.cleaned_job_title}</h2>
+                <div className="flex items-center mt-2">
+                  <EnvironmentOutlined className="text-purple-700 mr-1" />
+                  <Typography.Text className="text-sm text-gray-600">
+                    {job.city}, {job.state}
+                  </Typography.Text>
                 </div>
-              ))
-            : filteredJobs.length > 0
-            ? filteredJobs.map((job) => (
-                <div
-                  key={job.unique_id}
-                  ref={(el) => (jobRefs.current[job.unique_id] = el)}
-                  data-id={job.unique_id}
-                  className="bg-white shadow-lg rounded-lg p-6"
-                >
-                  <h2 className="text-base flex gap-2 items-center font-semibold">
-                    <FcBriefcase /> {job.company}
-                  </h2>
-                  <h2 className="text-lg font-bold">{job.cleaned_job_title}</h2>
-                  <div className="flex items-center mt-2">
-                    <EnvironmentOutlined className="text-purple-700 mr-1" />
-                    <Typography.Text className="text-sm text-gray-600">
-                      {job.city}, {job.state}
-                    </Typography.Text>
-                  </div>
-                  <p className="mt-4 text-gray-700">{job.description_digest}</p>
-                  <div className="mt-6 flex justify-end gap-4">
-                    <button
-                      className="bg-blue-600 text-white px-6 py-2 rounded-md"
-                      onClick={() => handleApplyNow(job.unique_id)}
-                    >
-                      Apply Now
-                    </button>
-                    <button
-                      className="bg-purple-700 text-white px-6 py-2 rounded-md"
-                      onClick={() => handleApplyForMe(job.unique_id)}
-                    >
-                      Apply for Me
-                    </button>
-                  </div>
+                <p className="mt-4 text-gray-700">{job.description_digest}</p>
+                <div className="mt-6 flex justify-end gap-4">
+                  <button
+                    className="bg-blue-600 text-white px-6 py-2 rounded-md"
+                    onClick={() => handleApplyNow(job.unique_id)}
+                  >
+                    Apply Now
+                  </button>
+                  <button
+                    className="bg-purple-700 text-white px-6 py-2 rounded-md"
+                    onClick={() => handleApplyForMe(job.unique_id)}
+                  >
+                    Apply for Me
+                  </button>
                 </div>
-              ))
-            : (
-                <div className="flex flex-col items-center justify-center p-5 text-black">
-                  <img
-                    src={EmptyState}
-                    alt="No jobs found"
-                    className="w-24 h-24 opacity-50"
-                  />
-                  <p className="mt-2 text-lg text-center font-semibold">
-                    Sorry, we were unable to find a matching job opening.
-                  </p>
-                  <p className="text-sm text-center text-gray-400">
-                    Don’t let that stop you. Try again, and narrow or broaden your
-                    search this time.
-                  </p>
-                </div>
-              )}
+              </div>
+            ))
+          ) : (
+            <div className="flex flex-col items-center justify-center p-5 text-black">
+              <img
+                src={EmptyState}
+                alt="No jobs found"
+                className="w-24 h-24 opacity-50"
+              />
+              <p className="mt-2 text-lg text-center font-semibold">
+                Sorry, we were unable to find a matching job opening.
+              </p>
+              <p className="text-sm text-center text-gray-400">
+                Don’t let that stop you. Try again, and narrow or broaden your
+                search this time.
+              </p>
+            </div>
+          )}
         </div>
 
         <NewJobReqModal
@@ -303,15 +311,12 @@ const JobsPage = () => {
         >
           <p>You need to sign up or log in to apply for this job.</p>
           <div className="flex justify-end gap-4 mt-4">
-            <Button
-              type="primary"
-              onClick={() => (window.location.href = "/login")}
-            >
-              Log In
-            </Button>
-            <Button onClick={() => (window.location.href = "/signup")}>
-              Sign Up
-            </Button>
+            <Link to="/outsource-apply/login">
+              <Button type="primary">Log In</Button>
+            </Link>
+            <Link to="/outsource-apply/sign-up">
+              <Button>Sign Up</Button>
+            </Link>
           </div>
         </Modal>
 

@@ -21,7 +21,7 @@ const CustomButton = ({
       onClick={onClick}
       disabled={disabled || loading}
       aria-label="submit button"
-      className={`${backgroundColor} ${radius} ${className} disabled:bg-gray-500 disabled:cursor-not-allowed relative flex items-center justify-center`}
+      className={`${backgroundColor} ${radius} ${className} disabled:bg-gray-500 disabled:cursor-not-allowed hover:bg-purple-600 relative flex items-center justify-center`}
     >
       {loading ? (
         <div className="flex items-center gap-2">

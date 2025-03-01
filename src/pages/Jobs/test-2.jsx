@@ -8,7 +8,7 @@ import {
 } from "../../services/apiSlice";
 import { FcBriefcase } from "react-icons/fc";
 import NewJobReqModal from "../../components/Requests/NewJobRequestModal";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import EmptyState from "../../assets/images/magnifier-with-path.svg";
 
 const JobsPage = () => {
@@ -165,17 +165,23 @@ const JobsPage = () => {
 
   // 🔹 Handle API response status
   useEffect(() => {
-    if (filterJobs?.statusCode !== "00") {
-      console.log("picked error: ", filterJobs?.statusCode);
-      message.error(filterJobs?.statusMessage || "Failed to fetch jobs. Please try again later.");
-      
-      // Set filteredJobs to an empty array if the status is not "00"
-      setFilteredJobs([]);
-    } else {
-      // If the status is "00", set filteredJobs to the fetched jobs data
-      setFilteredJobs(filterJobs);
-    }
-  }, [data, filterJobs]);
+      if (!filterJobs) return; // Ensure data is available
+    
+      if (filterJobs.statusCode !== "00") {
+        console.log("❌ Picked error: ", filterJobs.statusCode);
+        
+        message.error(
+          filterJobs.statusMessage || "Failed to fetch jobs. Please try again later."
+        );
+    
+        setFilteredJobs([]); // Clear jobs on error
+        return;
+      }
+    
+      if (filterJobs?.length) {
+        setFilteredJobs(filterJobs); // Update state only if jobsData is valid
+      }
+    }, [filterJobs]);
 
   return (
     <div>
@@ -301,15 +307,19 @@ const JobsPage = () => {
         >
           <p>You need to sign up or log in to apply for this job.</p>
           <div className="flex justify-end gap-4 mt-4">
+            <Link to="/outsource-apply/login">
             <Button
               type="primary"
-              onClick={() => (window.location.href = "/login")}
             >
               Log In
             </Button>
-            <Button onClick={() => (window.location.href = "/signup")}>
+            </Link>
+            <Link to="/outsource-apply/sign-up">
+            <Button
+            >
               Sign Up
             </Button>
+            </Link>
           </div>
         </Modal>
 

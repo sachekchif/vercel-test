@@ -25,6 +25,8 @@ const SignupForm = () => {
 
   const [isTermsAccepted, setIsTermsAccepted] = useState(false);
   const [error, setError] = useState("");
+  const [isPasswordTouched, setIsPasswordTouched] = useState(false); // Track if password field is touched
+  const [isConfirmPasswordTouched, setIsConfirmPasswordTouched] = useState(false); // Track if confirm password field is touched
   const [register, { isLoading }] = useRegisterMutation();
 
   const passwordRequirements = [
@@ -41,22 +43,21 @@ const SignupForm = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-  
-    if (name === "phoneNumber") {
-      console.warn("Unexpected field detected:", name); // Debugging line
-      return; // Prevent unintended fields
-    }
-  
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
-  
+
+    if (name === "password") {
+      setIsPasswordTouched(true); // Mark password field as touched
+    }
+
     if (name === "confirmPassword") {
+      setIsConfirmPasswordTouched(true); // Mark confirm password field as touched
       setError(value !== formData.password ? "Passwords do not match." : "");
     }
   };
-  
 
   const handleTermsChange = () => {
     setIsTermsAccepted((prev) => !prev);
@@ -64,26 +65,25 @@ const SignupForm = () => {
 
   const submitFormData = async (e) => {
     e.preventDefault();
-  
+
     if (!isTermsAccepted) {
       toast.error("You must agree to the Terms and Conditions.");
       return;
     }
-  
+
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match.");
       toast.error("Passwords must match!");
       return;
     }
-  
+
     if (!isPasswordValid(formData.password)) {
       toast.error("Password does not meet requirements.");
       return;
     }
-  
-    // Filter out any unexpected fields before sending data
+
     const { confirmPassword, phoneNumber, ...dataToSubmit } = formData;
-  
+
     try {
       const response = await register(dataToSubmit).unwrap();
       if (response.statusCode === "96") {
@@ -91,15 +91,14 @@ const SignupForm = () => {
       } else {
         message.success("Registration successful!");
         setTimeout(() => {
-          navigate("/verify-mail");
-        }, 3000);
+          navigate("/outsource-apply/verify-mail");
+        }, 1000);
       }
     } catch (err) {
       toast.error("Registration failed!");
       console.error("Registration failed:", err);
     }
   };
-  
 
   return (
     <div>
@@ -143,30 +142,30 @@ const SignupForm = () => {
         />
 
         {/* Password Validation Messages */}
-        {!isPasswordValid(formData.password) &&
-          formData.password.length > 0 && (
-            <div className="text-sm text-gray-600 mt-1">
-              <ul className=" ">
-                {passwordRequirements.map(({ regex, text }, index) => (
-                  <li
-                    key={index}
-                    className={
-                      regex.test(formData.password)
-                        ? "text-green-500"
-                        : "text-red-500"
-                    }
-                  >
-                    {regex.test(formData.password) ? (
-                      <CheckCircleFilled twoToneColor="#52c41a" />
-                    ) : (
-                      <CloseCircleFilled twoToneColor="#ff0000" />
-                    )}{" "}
-                    {text}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+        {(isPasswordTouched && !isPasswordValid(formData.password)) ||
+        !isConfirmPasswordTouched ? (
+          <div className="text-sm text-gray-600 mt-1">
+            <ul className=" ">
+              {passwordRequirements.map(({ regex, text }, index) => (
+                <li
+                  key={index}
+                  className={
+                    regex.test(formData.password)
+                      ? "text-green-500"
+                      : "text-red-500"
+                  }
+                >
+                  {regex.test(formData.password) ? (
+                    <CheckCircleFilled twoToneColor="#52c41a" />
+                  ) : (
+                    <CloseCircleFilled twoToneColor="#ff0000" />
+                  )}{" "}
+                  {text}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
 
         <Spacer y={6} />
         <CustomInput
@@ -180,14 +179,13 @@ const SignupForm = () => {
         />
         <Spacer y={6} />
         <CustomInput
-  type="text"
-  name="phone"  // Ensure it's "phone", not "phoneNumber"
-  label="Phone Number"
-  onChange={handleInputChange}
-  value={formData.phone} // Ensure it's from formData
-  placeholder="Enter phone number"
-/>
-
+          type="text"
+          name="phone"
+          label="Phone Number"
+          onChange={handleInputChange}
+          value={formData.phone}
+          placeholder="Enter phone number"
+        />
 
         <Spacer y={6} />
         <div className="flex items-center gap-2">

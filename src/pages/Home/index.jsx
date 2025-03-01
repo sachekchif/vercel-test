@@ -17,7 +17,7 @@ const Home = () => {
   const handleSearch = (e) => {
     e.preventDefault(); // Prevent page reload
     if (searchTerm.trim()) {
-      navigate(`/jobs/${encodeURIComponent(searchTerm)}`);
+      navigate(`/outsource-apply/jobs/${encodeURIComponent(searchTerm)}`);
     }
   };
   return (

@@ -57,9 +57,9 @@ const SuccessPage = () => {
                   </div>
                 </div>
 
-                <CustomButton>
-                  <Link to="/login">Proceed to Login</Link>
-                </CustomButton>
+                <Link to="/outsource-apply/login">
+                  <CustomButton>Proceed to Login</CustomButton>
+                </Link>
               </forn>
             </div>
           </div>
