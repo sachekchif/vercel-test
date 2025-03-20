@@ -7,21 +7,22 @@ import { DownOutlined, PlusOutlined, UserOutlined } from "@ant-design/icons";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Avatar, Button, Dropdown, Menu } from "antd";
 import NewJobRequestModal from "./Requests/NewJobRequestModal";
-import { logout } from "../utils/constants";
+import { useLogout } from "../utils/constants";
 
 const navItems = [
-  { title: "Home", href: "/outsource-apply" },
-  { title: "All Jobs", href: "/outsource-apply/alljobs" },
-  { title: "Pricing", href: "/outsource-apply/pricing" },
-  { title: "About Us", href: "/outsource-apply/about" },
+  { title: "Home", href: "/" },
+  { title: "All Jobs", href: "/alljobs" },
+  { title: "Pricing", href: "/pricing" },
+  { title: "About Us", href: "/about" },
   // { title: 'New Request', href: '#', modalTarget: 'new_request', modalToggle: 'new_request' },
 ];
 
-const LOGIN_URL = "/outsource-apply/login";
-const SIGN_UP_URL = "/outsource-apply/sign-up";
+const LOGIN_URL = "/login";
+const SIGN_UP_URL = "/sign-up";
 
 function Navbar() {
   const location = useLocation();
+  const logout = useLogout();
   const navigate = useNavigate();
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [isNavOpen, setNavOpen] = useState(false);
@@ -44,9 +45,9 @@ function Navbar() {
 
   const role = profile?.role;
   // console.log("r", role);
-  
 
-  const filteredNavItems = role === undefined || role === "user" ? navItems : [];
+  const filteredNavItems =
+    role === undefined || role === "user" ? navItems : [];
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -80,27 +81,58 @@ function Navbar() {
             `${user.profile.firstName
               .charAt(0)
               .toUpperCase()}${user.profile.firstName.slice(1)} 
-   ${user.profile.lastName
-     .charAt(0)
-     .toUpperCase()}${user.profile.lastName.slice(1)}`}
+     ${user.profile.lastName
+       .charAt(0)
+       .toUpperCase()}${user.profile.lastName.slice(1)}`}
         </span>
         <span className="block text-sm text-gray-500 truncate">
           {user?.profile?.email}
         </span>
+        {/* Display the user's role */}
+        {(role === "staff" || role === "admin" || role === "super_admin") && (
+          <span className="block text-sm text-gray-500">
+            {role.charAt(0).toUpperCase() + role.slice(1)}
+          </span>
+        )}
       </div>
-      <Menu.Item key="dashboard">
-        <Link to="/outsource-apply/dashboard">Dashboard</Link>
-      </Menu.Item>
-      <Menu.Item key="requests">
-        <Link to="/outsource-apply/all-requests">My Requests</Link>
-      </Menu.Item>
-      <Menu.Item key="profile">
-        <Link to="/outsource-apply/profile">Profile</Link>
-      </Menu.Item>
-      <Menu.Item key="/outsource-apply/login">Sign out</Menu.Item>
+  
+      {/* Conditional Menu Items Based on Role */}
+      {role === "staff" || role === "admin" || role === "super_admin" ? (
+        <>
+          <Menu.Item key="admin-dashboard">
+            <Link to="/admin-dashboard">Admin Dashboard</Link>
+          </Menu.Item>
+          {/* Show "Admin Requests" for super_admin and "Pending on Me" for others */}
+          {role === "super_admin" ? (
+            <Menu.Item key="admin-requests">
+              <Link to="/ad-all-requests">Admin Requests</Link>
+            </Menu.Item>
+          ) : (
+            <Menu.Item key="pending-on-me">
+              <Link to="/pending-requests">Pending on Me</Link>
+            </Menu.Item>
+          )}
+          <Menu.Item key="profile">
+            <Link to="/profile">Profile</Link>
+          </Menu.Item>
+          <Menu.Item key="signout">Sign out</Menu.Item>
+        </>
+      ) : (
+        <>
+          <Menu.Item key="dashboard">
+            <Link to="/dashboard">Dashboard</Link>
+          </Menu.Item>
+          <Menu.Item key="requests">
+            <Link to="/all-requests">My Requests</Link>
+          </Menu.Item>
+          <Menu.Item key="profile">
+            <Link to="/profile">Profile</Link>
+          </Menu.Item>
+          <Menu.Item key="signout">Sign out</Menu.Item>
+        </>
+      )}
     </Menu>
   );
-
   return (
     <nav className="bg-white border-b border-gray-100 fixed top-0 z-50 w-full px-8">
       <div className="max-w-screen-3xl flex flex-wrap items-center justify-between mx-auto py-4">
@@ -127,12 +159,12 @@ function Navbar() {
         </button>
 
         {/* Logo */}
-        <a
-          href="index.html"
+        <Link
+          to="/"
           className="flex items-center space-x-3 rtl:space-x-reverse"
         >
           <img src={logoImage} className="h-6 md:h-8 mr-2" alt="Logo" />
-        </a>
+        </Link>
 
         {/* User and New Request Buttons */}
         <div className="flex items-center md:order-2 gap-4">
@@ -220,7 +252,8 @@ function Navbar() {
                 <Link
                   to={item.href}
                   className={`block py-2 px-3 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 ${
-                    location.pathname === item.href
+                    location.pathname === item.href ||
+                    (item.href === "/alljobs" && location.pathname.startsWith("/alljobs"))
                       ? "text-blue-700 font-bold"
                       : "text-gray-900"
                   }`}

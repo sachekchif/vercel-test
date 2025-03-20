@@ -113,7 +113,7 @@ const AllStaff = () => {
 
   console.log("Filtered Users:", filteredUsers);
   // Count Users by Status
-  const activeUsersCount = usersData?.data.filter(
+  const activeUsersCount = usersData?.data?.filter(
     (user) => user.status === "active"
   ).length;
   const BlockedUserCount = filteredUsers.filter(

@@ -1,8 +1,8 @@
 {
   "redirects": [
-    { "source": "/", "destination": "/outsource-apply", "permanent": true }
+    { "source": "/", "destination": "/", "permanent": true }
   ],
   "rewrites": [
-    { "source": "/outsource-apply(.*)", "destination": "index.html" }
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

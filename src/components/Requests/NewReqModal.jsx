@@ -4,7 +4,7 @@ import CustomInput from "../CustomRequestInput";
 import Spacer from "../../utils/Spacer";
 import { toast } from "sonner";
 import { useCreateRequestMutation } from "../../services/apiSlice";
-import { Input, Spin } from "antd";
+import { Input, message, Spin } from "antd";
 import FileUpload from "../FileUpload";
 const { TextArea } = Input;
 
@@ -80,17 +80,17 @@ const NewRequestModal = ({ isOpen, onClose, profile }) => {
     console.log("click");
 
     // Check subscription
-    // if (profile?.subscription === "free") {
-    //   console.log("subs", profile.subscription);
-    //   toast.error(
-    //     "You have not subscribed to Outsource Apply yet. Redirecting you to subscribe..."
-    //   );
-    //   setTimeout(() => {
-    //     window.open("/checkout", "_blank");
-    //     // window.location.href = "/checkout"; // Redirect to checkout
-    //   }, 2000); // Allow time for the toast to show
-    //   return; // Exit the function
-    // }
+    if (profile?.subscription === "free") {
+      console.log("subs", profile.subscription);
+      toast.error(
+        "You have not subscribed to Outsource Apply yet. Redirecting you to subscribe..."
+      );
+      setTimeout(() => {
+        window.open("/checkout", "_blank");
+        window.location.href = "/checkout"; // Redirect to checkout
+      }, 2000); // Allow time for the toast to show
+      return; // Exit the function
+    }
 
     // const payload = {
     //   jobTitle: formData.jobTitle,
@@ -118,16 +118,16 @@ const NewRequestModal = ({ isOpen, onClose, profile }) => {
     try {
       const response = await createRequest(payload).unwrap();
       if (response.statusCode === "00") {
-        toast.success("Request successfully created.");
+        message.success("Request successfully created.");
         navigate("/all-requests");
         onClose();
       } else if (response.statusCode === "96") {
         const message =
           response?.data || response.statusMessage || "Unknown error.";
-        toast.error(message);
+        message.error(message);
       }
     } catch (err) {
-      toast.error("An error occurred while creating the request.");
+      message.error("An error occurred while creating the request.");
     }
   };
 

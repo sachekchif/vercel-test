@@ -2,8 +2,10 @@ import React, { useState } from "react"; // Adjust the path if the file is in a 
 import CustomInput from "../CustomRequestInput";
 import { useChangePasswordMutation } from "../../services/apiSlice";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 const ChangePasswordForm = () => {
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
     oldPassword: "",
     newPassword: "",
@@ -41,6 +43,12 @@ const ChangePasswordForm = () => {
       console.log("Password changed successfully:", response);
       if (response.statusCode === "00") {
         toast.success("Password changed successfully");
+        navigate("/profile")
+        setFormData({
+          oldPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        })
         // onClose(); // Close the modal on success
       } else if (response.statusCode === "96") {
         const message =

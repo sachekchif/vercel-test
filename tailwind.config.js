@@ -35,7 +35,7 @@ export default {
         zoomIn: 'zoomIn 0.3s ease-out forwards',
       },
       fontFamily: {
-        Archivo: ['DM Sans', 'sans-serif'],
+        // Archivo: ['DM Sans', 'sans-serif'],
         DMSerifDisplay: ['DM Serif Display', 'serif'],
         // Add more fonts as needed
         Archivo: ['Archivo', 'sans-serif'],

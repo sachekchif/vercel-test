@@ -21,9 +21,10 @@ const JobsPage = () => {
   const [userInformation, setUserInformation] = useState(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState(null);
-  const { data, isLoading } = useFetchAllJobsQuery();
+  const { data } = useFetchAllJobsQuery();
   const jobsData = data?.data || [];
-  const [triggerFetchJobs, { data: filterJobs, isLoading: loadingFilterJobs }] =
+  const [loadingFilterJobs, setLoadingFilterJobs] = useState(true); // Add loading state
+  const [triggerFetchJobs, { data: filterJobs }] =
     useFetchFilteredJobsMutation();
 
   const [activeJobId, setActiveJobId] = useState(
@@ -147,7 +148,7 @@ const JobsPage = () => {
       setIsAuthModalOpen(true);
       return;
     }
-    const jobToApply = filterJobs.find((job) => job.unique_id === jobId);
+    const jobToApply = filteredJobs?.find((job) => job.unique_id === jobId);
     window.open(jobToApply?.incoming_click_url, "_blank");
   };
 
@@ -155,7 +156,7 @@ const JobsPage = () => {
     if (!userInformation) {
       setIsAuthModalOpen(true);
     } else {
-      const jobToApply = filterJobs.find((job) => job.unique_id === jobId);
+      const jobToApply = filteredJobs?.find((job) => job.unique_id === jobId);
       setSelectedJob(jobToApply);
       setIsJobModalOpen(true);
     }
@@ -175,12 +176,14 @@ const JobsPage = () => {
         );
     
         setFilteredJobs([]); // Clear jobs on error
+        setLoadingFilterJobs(false);
         return;
       }
     
       if (filterJobs?.length) {
         setFilteredJobs(filterJobs); // Update state only if jobsData is valid
       }
+      setLoadingFilterJobs(false);
     }, [filterJobs]);
 
   return (
@@ -307,14 +310,14 @@ const JobsPage = () => {
         >
           <p>You need to sign up or log in to apply for this job.</p>
           <div className="flex justify-end gap-4 mt-4">
-            <Link to="/outsource-apply/login">
+            <Link to="/login">
             <Button
               type="primary"
             >
               Log In
             </Button>
             </Link>
-            <Link to="/outsource-apply/sign-up">
+            <Link to="/sign-up">
             <Button
             >
               Sign Up

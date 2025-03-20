@@ -14,7 +14,7 @@ import { useFetchAllJobsQuery } from "../../services/apiSlice";
 import { FcBriefcase } from "react-icons/fc";
 import NewJobReqModal from "../../components/Requests/NewJobRequestModal";
 import EmptyState from "../../assets/images/magnifier-with-path.svg";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const JobsPage = () => {
   const jobRefs = useRef({});
@@ -25,8 +25,10 @@ const JobsPage = () => {
   const [userInformation, setUserInformation] = useState(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState(null);
-  const { data, isLoading, error } = useFetchAllJobsQuery();
+  const [isLoading, setIsLoading] = useState(true);
+  const { data, error } = useFetchAllJobsQuery();
   const jobsData = data?.data || [];
+  const navigate = useNavigate();
 
   const [activeJobId, setActiveJobId] = useState(
     jobsData?.[0]?.unique_id || ""
@@ -137,22 +139,58 @@ const JobsPage = () => {
 
   // 🔹 Handle Apply
   const handleApplyNow = (jobId) => {
+    const jobToApply = jobsData.find((job) => job.unique_id === jobId);
     if (!userInformation) {
+      setSelectedJob(jobToApply);
+      updateUrlForModal("applyNow", jobToApply);
       setIsAuthModalOpen(true);
       return;
     }
-    const jobToApply = jobsData.find((job) => job.unique_id === jobId);
     window.open(jobToApply?.incoming_click_url, "_blank");
   };
 
   const handleApplyForMe = (jobId) => {
+    const jobToApply = jobsData.find((job) => job.unique_id === jobId);
+    setSelectedJob(jobToApply);
     if (!userInformation) {
+      updateUrlForModal("applyForMe", jobToApply);
       setIsAuthModalOpen(true);
-    } else {
-      const jobToApply = jobsData.find((job) => job.unique_id === jobId);
-      setSelectedJob(jobToApply);
-      setIsJobModalOpen(true);
+      return;
     }
+    setIsJobModalOpen(true);
+  };
+
+  // 🔹 Update URL for modal
+  const updateUrlForModal = (modalType, job) => {
+    const url = new URL(window.location);
+    url.searchParams.set("modal", modalType);
+    url.searchParams.set("jobId", job.unique_id);
+    url.searchParams.set("title", job.cleaned_job_title.replace(/ /g, "-"));
+    url.searchParams.set("company", job.company.replace(/ /g, "-"));
+    window.history.pushState({}, "", url.toString());
+  };
+
+  // 🔹 Clean up URL
+  const cleanUpUrl = () => {
+    const url = new URL(window.location);
+    url.searchParams.delete("modal");
+    url.searchParams.delete("jobId");
+    url.searchParams.delete("title");
+    url.searchParams.delete("company");
+    window.history.replaceState({}, "", url.toString());
+  };
+
+  // 🔹 Handle Auth Modal Close
+  const handleAuthModalClose = () => {
+    setIsAuthModalOpen(false);
+    cleanUpUrl();
+  };
+
+  // 🔹 Handle Job Modal Close
+  const handleJobModalClose = () => {
+    localStorage.removeItem("selectedJob");
+    setIsJobModalOpen(false);
+    cleanUpUrl();
   };
 
   // 🔹 Handle API response status
@@ -167,13 +205,31 @@ const JobsPage = () => {
       );
 
       setFilteredJobs([]); // Clear jobs on error
+      setIsLoading(false); // Stop loading
       return;
     }
 
     if (jobsData?.length) {
       setFilteredJobs(jobsData); // Update state only if jobsData is valid
     }
+    setIsLoading(false); // Stop loading
   }, [data, jobsData]);
+  // Check localStorage for selected job after login
+  useEffect(() => {
+    const storedJob = localStorage.getItem("selectedJob");
+    if (storedJob && userInformation) {
+      // Only proceed if user is logged in
+      const parsedJob = JSON.parse(storedJob);
+      const jobToApply = filteredJobs.find(
+        (job) => job.unique_id === parsedJob.jobId
+      );
+      if (jobToApply) {
+        setSelectedJob(jobToApply);
+        setIsJobModalOpen(true); // Open the modal
+        updateUrlForModal("applyForMe", jobToApply);
+      }
+    }
+  }, [filteredJobs, userInformation]); // Depend on userInformation to trigger after login
 
   return (
     <div>
@@ -298,25 +354,59 @@ const JobsPage = () => {
 
         <NewJobReqModal
           isOpen={isJobModalOpen}
-          onClose={() => setIsJobModalOpen(false)}
+          onClose={handleJobModalClose}
           profile={userInformation?.profile}
           job={selectedJob} // Pass the selected job
         />
         {/* no user modal */}
         <Modal
           open={isAuthModalOpen}
-          onCancel={() => setIsAuthModalOpen(false)}
+          onCancel={handleAuthModalClose}
           footer={null}
-          title="Sign Up or Log In"
+          title={`Want to work as a ${selectedJob?.cleaned_job_title} at "${selectedJob?.company}"`}
         >
-          <p>You need to sign up or log in to apply for this job.</p>
+          <p>
+            You need to be a member of{" "}
+            <strong className="text-purple-700">Outsource Apply</strong> to
+            apply for jobs. Please sign up or log in to continue.
+          </p>
           <div className="flex justify-end gap-4 mt-4">
-            <Link to="/outsource-apply/login">
-              <Button type="primary">Log In</Button>
-            </Link>
-            <Link to="/outsource-apply/sign-up">
-              <Button>Sign Up</Button>
-            </Link>
+            <Button
+              className="bg-purple-800 text-white hover:!bg-purple-700"
+              onClick={() => {
+                // Store the selected job in localStorage
+                localStorage.setItem(
+                  "selectedJob",
+                  JSON.stringify({
+                    jobId: selectedJob?.unique_id,
+                    title: selectedJob?.cleaned_job_title,
+                    company: selectedJob?.company,
+                  })
+                );
+                // Navigate to login page with redirect URL as a query parameter
+                navigate(`/login?redirect=${window.location.pathname}`);
+              }}
+            >
+              Log In
+            </Button>
+            <Button
+              className="hover:!text-purple-700 hover:!border-purple-700"
+              onClick={() => {
+                // Store the selected job in localStorage
+                localStorage.setItem(
+                  "selectedJob",
+                  JSON.stringify({
+                    jobId: selectedJob?.unique_id,
+                    title: selectedJob?.cleaned_job_title,
+                    company: selectedJob?.company,
+                  })
+                );
+                // Navigate to signup page with redirect URL as a query parameter
+                navigate(`/signup?redirect=${window.location.pathname}`);
+              }}
+            >
+              Sign Up
+            </Button>
           </div>
         </Modal>
 

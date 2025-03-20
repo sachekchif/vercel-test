@@ -13,6 +13,9 @@ const EditRequestModal = ({ isOpen, onClose, profile, isLoading }) => {
     coverLetter: null,
     followUpMail: null,
   });
+
+  console.log("tt", profile);
+  
   const [updateRequest, { isLoading: requestLoading, data: requesttData }] =
     useUpdateRequestMutation(); // Mutation hook
   const userData = profile?.data;
@@ -42,7 +45,7 @@ const EditRequestModal = ({ isOpen, onClose, profile, isLoading }) => {
         }));
       }
     }
-  }, [userData, form]);
+  }, [userData, user, form, profile, isOpen]);
 
   // Update state when a file is selected
   const handleFileSelect = (fileKey, base64Data, fileName) => {
@@ -161,7 +164,7 @@ const EditRequestModal = ({ isOpen, onClose, profile, isLoading }) => {
             </Checkbox>
           </Form.Item>
 
-          {!userData?.requestDocuments[0]?.docRef && (
+          {!!userData?.requestDocuments[0]?.useExistingCv && (
             <Form.Item label="Upload Updated CV">
               <CustomUpload
                 fileType="Updated CV"

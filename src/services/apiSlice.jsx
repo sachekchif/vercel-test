@@ -1,24 +1,19 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { message } from "antd";
-import { useEffect } from "react";
 import { toast } from "sonner";
-import { logout } from "../utils/constants";
+import { clearSessionStorage } from "../utils/constants";
 
-const baseUrl = import.meta.env.VITE_PUBLIC_API_BASE_URL2;
+const baseUrl = import.meta.env.VITE_PUBLIC_API_BASE_URL2 || "http://default-url.com";
 const refreshTokenUrl = "/auth/refresh-token";
 
-let refreshInterval;
 let inactivityTimer;
 
-export const isUserActive = () => {
-  console;
-  return !!sessionStorage.getItem("userInformation");
-};
-// Custom base query with token refresh logic
+const debug = true; // Set to `true` to enable debugging logs
+
 const customBaseQuery = fetchBaseQuery({
   baseUrl,
   prepareHeaders: (headers) => {
-    console.log("Preparing headers..."); // Debug
+    if (debug) console.log("[DEBUG] Preparing headers...");
     const userInformation = sessionStorage.getItem("userInformation")
       ? JSON.parse(sessionStorage.getItem("userInformation") || "{}")
       : null;
@@ -27,103 +22,136 @@ const customBaseQuery = fetchBaseQuery({
 
     if (accessToken) {
       headers.set("Authorization", `Bearer ${accessToken}`);
-      console.log("Access token added to headers"); // Debug
+      if (debug) console.log("[DEBUG] Access token added to headers");
     }
 
     headers.set("Content-Type", "application/json");
-    console.log("Headers prepared:", headers); // Debug
+    if (debug) console.log("[DEBUG] Headers prepared:", headers);
     return headers;
   },
 });
 
+const refreshTokenApi = async () => {
+  console.log("[DEBUG] Starting token refresh API call...");
+
+  const userInformation = JSON.parse(
+    sessionStorage.getItem("userInformation") || "{}"
+  );
+  const refreshToken = userInformation?.refresh_token;
+
+  if (!refreshToken) {
+    console.warn("[WARN] No refresh token found for scheduled refresh");
+    toast.warn("No refresh token found. Please log in again.");
+    window.location.href = "/login";
+    return null;
+  }
+
+  try {
+    console.log("[DEBUG] Fetching new tokens...");
+    const response = await fetch(baseUrl + refreshTokenUrl, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${refreshToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    const result = await response.json();
+    console.log("Token refresh response:", result);
+
+    if (result.error) {
+      console.error("[ERROR] Token refresh API error:", result.error);
+      throw new Error(result.error);
+    }
+
+    if (result.statusCode === "99") {
+      console.warn("[WARN] Session expired. Redirecting to login...");
+      toast.error("Session expired. Please log in again.");
+      // clearSessionStorage();
+      // setTimeout(() => {
+      //   window.location.href = "/login";
+      // }, 3000);
+    }
+
+    if (result?.access_token && result?.refresh_token) {
+      console.log("[DEBUG] Updating session storage with new tokens...");
+      sessionStorage.setItem(
+        "userInformation",
+        JSON.stringify({
+          ...userInformation,
+          access_token: result.access_token,
+          refresh_token: result.refresh_token,
+        })
+      );
+      console.log("[INFO] Updated tokens saved after scheduled refresh");
+      return result;
+    }
+  } catch (error) {
+    console.error("[ERROR] Token refresh API error:", error);
+    toast.error("Failed to refresh token. Please try again.");
+    throw error;
+  }
+
+  console.log("[DEBUG] No tokens were refreshed.");
+  return null;
+};
+
+export const isUserActive = () => {
+  const isActive = !!sessionStorage.getItem("userInformation");
+  console.log(`[DEBUG] User is ${isActive ? "active" : "inactive"}`);
+  return isActive;
+};
+
 export const scheduleTokenRefresh = () => {
-  console.log("Starting token refresh scheduler...");
+  console.log("[INFO] Starting token refresh scheduler...");
 
-  if (refreshInterval) return; // Prevent multiple intervals
-
-  refreshInterval = setInterval(async () => {
+  // Create a new interval
+  const interval = setInterval(async () => {
     if (!isUserActive()) {
-      console.warn("User is not logged in. Stopping token refresh.");
+      console.warn("[WARN] User is not logged in. Stopping token refresh.");
       stopTokenRefresh();
       return;
     }
 
-    console.log("Executing scheduled token refresh...");
-    const userInformation = JSON.parse(
-      sessionStorage.getItem("userInformation") || "{}"
-    );
-    const refreshToken = userInformation?.refresh_token;
-
-    if (!refreshToken) {
-      console.warn("No refresh token found for scheduled refresh");
-      return;
-    }
-
+    console.log("[INFO] Executing scheduled token refresh...");
     try {
-      const response = await fetch(baseUrl + refreshTokenUrl, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${refreshToken}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      const data = await response.json();
-      console.log("Token refresh response:", data);
-
-      if (data.access_token && data.refresh_token) {
-        sessionStorage.setItem(
-          "userInformation",
-          JSON.stringify({
-            ...userInformation,
-            access_token: data.access_token,
-            refresh_token: data.refresh_token,
-          })
-        );
-        console.log("Updated tokens saved after scheduled refresh");
-      }
+      await refreshTokenApi(); // Ensure this is awaited
     } catch (error) {
-      console.error("Scheduled token refresh error:", error);
+      console.error("[ERROR] Scheduled token refresh error:", error);
     }
-  }, 10 * 60 * 1000); // Refresh token every 13 minutes
+  }, 10 * 60 * 1000); // Refresh token every 10 minutes
+
+  console.log("[DEBUG] Token refresh interval started.");
+  return interval; // Return the interval ID
 };
 
- const stopTokenRefresh = () => {
-  if (refreshInterval) {
-    clearInterval(refreshInterval);
-    refreshInterval = null;
-    console.warn("Token refresh stopped due to inactivity.");
-  }
-
-  // Show Ant Design error message
-  message.error("Inactive for too long. Logging out...", 2); // 2-second duration
-
-  // Set a timeout before logging out
+export const stopTokenRefresh = () => {
+  console.log("[INFO] Stopping token refresh scheduler...");
+  // clearSessionStorage();
   // setTimeout(() => {
-  //   logout();
-
-  //   // Redirect to login page
   //   window.location.href = "/login";
-  // }, 2000); // 2-second delay before logout
+  // }, 3000);
 };
 
 export const resetInactivityTimer = () => {
-  console.log("User is active. Resetting inactivity timer...");
   if (inactivityTimer) clearTimeout(inactivityTimer);
 
+  // Mark user as active
+  sessionStorage.setItem("isActive", "true");
+
   inactivityTimer = setTimeout(() => {
-    console.warn("User inactive for 10 minutes. Stopping token refresh.");
+    console.warn("[WARN] User inactive for 10 minutes. Stopping token refresh.");
     stopTokenRefresh();
-  }, 10 * 60 * 1000); // Stop token refresh after 10 minutes of inactivity
+  }, 10 * 60 * 1000);
 };
 
-// Detect user activity and reset inactivity timer
 export const startActivityListeners = () => {
+  if (debug) console.log("[DEBUG] Starting activity listeners...");
   ["mousemove", "keydown", "click"].forEach((event) =>
     document.addEventListener(event, resetInactivityTimer)
   );
+  if (debug) console.log("[DEBUG] Activity listeners started.");
 };
-
 const baseQueryWithReauth = async (args, api, extraOptions) => {
   console.log("Executing query:", args); // Debug
   let result = await customBaseQuery(args, api, extraOptions);
@@ -138,76 +166,39 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 
     if (result.error.status === 401) {
       console.log("Unauthorized error detected, attempting token refresh"); // Debug
-      const userInformation = sessionStorage.getItem("userInformation")
-        ? JSON.parse(sessionStorage.getItem("userInformation") || "{}")
-        : null;
 
-      const refreshToken = userInformation?.refresh_token;
+      try {
+        // Call the refreshTokenApi to get new tokens
+        const newTokens = await refreshTokenApi();
 
-      if (!refreshToken) {
-        // No refresh token found, log out
-        toast.error("Session expired. Logging out...");
+        if (newTokens) {
+          // Tokens were successfully refreshed
+          console.log("Tokens updated after reauthentication:", newTokens); // Debug
 
-        // Clear session storage
-        // Set a timeout before logging out
-        // setTimeout(() => {
-        //   logout();
-
-        //   // Redirect to login page
-        //   window.location.href = "/login";
-        // }, 2000); // 2-second delay before logout
-        return; // Stop further execution
-      }
-
-      if (refreshToken) {
-        const refreshResult = await customBaseQuery(
-          {
-            url: refreshTokenUrl,
-            method: "GET",
-            headers: { Authorization: `Bearer ${refreshToken}` },
-          },
-          api,
-          extraOptions
-        );
-
-        console.log("Token refresh result:", refreshResult); // Debug
-
-        if (refreshResult.data) {
-          // const refreshData = JSON.parse(refreshResult.data);
-
-          if (
-            refreshResult.data.statusCode === "99" ||
-            refreshResult.statusCode === "99"
-          ) {
-            // Refresh token expired, log out
-            toast.error("Session expired. Logging out...");
-
-            // Clear session storage
-            // Set a timeout before logging out
-            // setTimeout(() => {
-            //   logout();
-
-            //   // Redirect to login page
-            //   window.location.href = "/login";
-            // }, 2000); // 2-second delay before logout
-            return; // Stop further execution
-          }
-          const { access_token, refresh_token } = refreshResult.data;
-
-          const updatedUserInformation = {
-            ...userInformation,
-            access_token,
-            refresh_token,
-          };
-
-          sessionStorage.setItem(
-            "userInformation",
-            JSON.stringify(updatedUserInformation)
-          );
-          console.log("Tokens updated after reauthentication"); // Debug
-
+          // Retry the original request with the new access token
           result = await customBaseQuery(args, api, extraOptions);
+        } else {
+          // Token refresh failed (e.g., no refresh token or session expired)
+          console.warn("[WARN] Session expired. Redirecting to login...");
+          toast.error(
+            "You have been inactive on the dashboard for a while, session expired. Please log in again."
+          );
+          clearSessionStorage();
+          // Delay redirection by 3 seconds (3000ms)
+          setTimeout(() => {
+            window.location.href = "/login";
+          }, 3000);
+          return; // Stop further execution
         }
+      } catch (error) {
+        // Handle errors during token refresh
+        console.error("Error during token refresh:", error); // Debug
+        toast.error("Failed to refresh token. Logging out...");
+
+        // Clear session storage and redirect to login
+        sessionStorage.removeItem("userInformation");
+        window.location.href = "/login";
+        return; // Stop further execution
       }
     }
   }
@@ -409,6 +400,17 @@ export const apiSlice = createApi({
       },
       invalidatesTags: ["Admin"],
     }),
+    updateStaff: builder.mutation({
+      query: (requestData) => {
+        console.log("Update staff request with data:", requestData); // Debug
+        return {
+          url: "/admin/update-admin",
+          method: "POST",
+          body: requestData,
+        };
+      },
+      invalidatesTags: ["Admin"],
+    }),
 
     updateUserStatusToSuspended: builder.mutation({
       query: ({ userId }) => {
@@ -419,7 +421,7 @@ export const apiSlice = createApi({
           body: { userId },
         };
       },
-      invalidatesTags: ["Admin"], // Invalidate the Users cache to refresh the data
+      invalidatesTags: ["Admin"],
     }),
     updateUserStatusToActive: builder.mutation({
       query: ({ userId }) => {
@@ -430,7 +432,7 @@ export const apiSlice = createApi({
           body: { userId },
         };
       },
-      invalidatesTags: ["Admin"], // Invalidate the Users cache to refresh the data
+      invalidatesTags: ["Admin"],
     }),
     getStaffByRole: builder.mutation({
       query: ({ role }) => {
@@ -538,6 +540,18 @@ export const apiSlice = createApi({
       },
       invalidatesTags: ["Jobs"],
     }),
+    updateRequesttoComplete: builder.mutation({
+      query: (requestData) => {
+        console.log("Update job request with complete:", requestData); // Debug
+
+        return {
+          url: "/requests/completed",
+          method: "POST",
+          body: requestData,
+        };
+      },
+      invalidatesTags: ["Jobs"],
+    }),
     fetchAllRequests: builder.query({
       query: ({ dateTo, dateFrom, status }) => {
         console.log("Fetching all requests with filters:", {
@@ -629,6 +643,7 @@ export const {
 
   // Admin
   useCreateStaffRequestMutation,
+  useUpdateStaffMutation,
   useUpdateUserStatusToSuspendedMutation,
   useUpdateUserStatusToActiveMutation,
   useGetStaffByRoleMutation,
@@ -647,6 +662,7 @@ export const {
   useCreateRequestMutation,
   useUpdateRequestInReviewMutation,
   useUpdateRequestMutation,
+  useUpdateRequesttoCompleteMutation,
   useFetchAllRequestsQuery,
   useFetchRequestByIdQuery,
 

@@ -3,7 +3,8 @@ import Modal from "react-modal";
 import CustomInput from "../CustomRequestInput";
 import Spacer from "../../utils/Spacer";
 import { toast } from "sonner";
-import { useCreateStaffRequestMutation } from "../../services/apiSlice";
+import { useUpdateStaffMutation } from "../../services/apiSlice"
+import CustomLoadingButton from "../CustomLoadingButton";
 
 const modalStyles = {
   overlay: {
@@ -34,6 +35,7 @@ const EditStaffModal = ({ isOpen, onClose, staffInfo }) => {
     email: "",
     staffEmail: "",
     username: "",
+    phone: "",
     role: "",
   });
 
@@ -45,12 +47,13 @@ const EditStaffModal = ({ isOpen, onClose, staffInfo }) => {
         email: staffInfo.email || "",
         staffEmail: staffInfo.staffEmail || "",
         username: staffInfo.username || "",
+        phone: staffInfo.phone || "",
         role: staffInfo.role || "",
       });
     }
   }, [staffInfo]);
 
-  const [createStaffRequest, { isLoading }] = useCreateStaffRequestMutation();
+  const [updateStaffRequest, { isLoading }] = useUpdateStaffMutation();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -68,26 +71,24 @@ const EditStaffModal = ({ isOpen, onClose, staffInfo }) => {
     // Prepare the payload with only the required fields
     const payload = {
       email: formData.email,
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      staffEmail: finalUsername,
-      username: formData.staffEmail,
+      phone: formData.phone,
+      staffEmail: formData.staffEmail,
       role: formData.role,
     };
 
     console.log("Submitting payload:", payload);
 
-    // try {
-    //   const response = await createStaffRequest(payload).unwrap();
-    //   if (response.statusCode === "00") {
-    //     toast.success("Request successfully created.");
-    //     onClose();
-    //   } else {
-    //     toast.error(response?.data || "An error occurred.");
-    //   }
-    // } catch (err) {
-    //   toast.error("An error occurred while creating the request.");
-    // }
+    try {
+      const response = await updateStaffRequest(payload).unwrap();
+      if (response.statusCode === "00") {
+        toast.success("Staff successfully updated.");
+        onClose();
+      } else {
+        toast.error(response?.data || "An error occurred.");
+      }
+    } catch (err) {
+      toast.error("An error occurred while creating the request.");
+    }
   };
 
   return (
@@ -131,7 +132,7 @@ const EditStaffModal = ({ isOpen, onClose, staffInfo }) => {
               value={formData.firstName}
               onChange={handleInputChange}
               placeholder="Enter Firstname"
-              disabled={formData.firstName}
+              // disabled={formData.firstName}
             />
             <Spacer size="24px" />
 
@@ -141,11 +142,11 @@ const EditStaffModal = ({ isOpen, onClose, staffInfo }) => {
               value={formData.lastName}
               onChange={handleInputChange}
               placeholder="Enter Lastname"
-              disabled={formData.lastName}
+              // disabled={formData.lastName}
             />
             <Spacer size="24px" />
 
-            <CustomInput
+            {/* <CustomInput
               label="Email Address"
               name="email"
               value={formData.email}
@@ -153,9 +154,9 @@ const EditStaffModal = ({ isOpen, onClose, staffInfo }) => {
               placeholder="Enter an email address"
               disabled={formData.email}
             />
-            <Spacer size="24px" />
+            <Spacer size="24px" /> */}
 
-            <CustomInput
+            {/* <CustomInput
               label="Username"
               name="username"
               value={formData.username}
@@ -163,7 +164,7 @@ const EditStaffModal = ({ isOpen, onClose, staffInfo }) => {
               placeholder="Enter username"
               disabled={formData.username}
             />
-            <Spacer size="24px" />
+            <Spacer size="24px" /> */}
 
             <CustomInput
               type="text"
@@ -172,7 +173,7 @@ const EditStaffModal = ({ isOpen, onClose, staffInfo }) => {
               value={formData.staffEmail}
               onChange={handleInputChange}
               placeholder="Enter your Staff Email Address"
-              disabled={formData.staffEmail}
+              // disabled={formData.staffEmail}
             />
             <Spacer size="24px" />
 
@@ -186,15 +187,15 @@ const EditStaffModal = ({ isOpen, onClose, staffInfo }) => {
             /> */}
             {/* <Spacer size="24px" /> */}
 
-            {/* <CustomInput
-              type="tel"
+            <CustomInput
               label="Phone Number"
               name="phone"
               value={formData.phone}
               onChange={handleInputChange}
               placeholder="Enter a Phone Number"
+              // disabled={formData.phone}
             />
-            <Spacer size="24px" /> */}
+            <Spacer size="24px" />
 
             <div className="mb-8 max-w-md">
               <label
@@ -223,14 +224,17 @@ const EditStaffModal = ({ isOpen, onClose, staffInfo }) => {
 
         {/* Modal footer */}
         <div className="flex justify-center p-4">
-          <button
+          {/* <button
             type="submit"
             className="py-2 px-16 rounded text-sm text-white bg-purple-700 hover:bg-purple-600"
             disabled={isLoading}
             onClick={handleSubmit}
           >
             {isLoading ? "Submitting..." : "Update Staff"}
-          </button>
+          </button> */}
+          <CustomLoadingButton isLoading={isLoading} onClick={handleSubmit}>
+            Update Staff Information
+          </CustomLoadingButton>
         </div>
       </div>
     </Modal>

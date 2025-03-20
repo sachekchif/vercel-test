@@ -17,6 +17,7 @@ import {
 import { BulletList } from "react-content-loader";
 import { itemRender, onShowSizeChange } from "../../components/Pagination.jsx";
 import {
+  capitalizeText,
   CompletedIcon,
   DeleteIcon,
   EditIcon,
@@ -210,27 +211,30 @@ const AllRequests = () => {
   const dashboardData = [
     {
       label: "Total Requests",
-      description: "Overall Requests processed",
+      description: "Requests you've been making all these while",
       value: totalLength ? totalLength : 0,
-      link: "all-requests",
+      link: "/all-requests",
       color: "",
       icon: <TotalReqIcon />,
+      loading: isLoading,
     },
     {
-      label: "Approved Requests",
-      description: "Requests that's been approved",
+      label: "Completed Requests",
+      description: "Requests has been reviewed and submitted",
       value: completedData?.length || 0,
-      link: "all_users.html",
+      link: "/all-requests",
       color: "text-green-500",
       icon: <CompletedIcon />,
+      loading: isLoading,
     },
     {
       label: "Pending Requests",
-      description: "Requests that's yet to be reviewed",
+      description: "Requests are still being reviewed",
       value: pendingData?.data?.length || 0,
       link: "all_staff.html",
       color: "text-red-500",
       icon: <PendingIcon />,
+      loading: isLoading,
     },
   ];
   const columns = [
@@ -238,34 +242,24 @@ const AllRequests = () => {
       title: "JOB TITLE",
       dataIndex: "jobTitle",
       render: (text, record) => (
-        <p className="table-avatar">{text !== null ? text : "null"}</p>
+        <p className="table-avatar font-bold">{text !== null ? text : "null"}</p>
       ),
     },
 
     {
       title: "Company Name",
-      dataIndex: "companyName",
+      dataIndex: "logdate",
       render: (text, record, index) => (
         <div className="flex-column">
-          <div className="mb-1">{record.companyName}</div>
-          <div className="text-body-secondary">{record.location}</div>
+          <div className="font-medium mb-2">{record.companyName}</div>
+          <div className="text-gray-500">{record.location}</div>
         </div>
       ),
     },
     {
       title: "Application Date",
-      dataIndex: "applicationDate",
-      render: (text, record) => <p className="table-avatar">{text}</p>,
-    },
-    {
-      title: "Company Name",
-      dataIndex: "companyName",
-      render: (text, record, index) => (
-        <div className="flex-column">
-          <div className="mb-1">{record.companyName}</div>
-          <div className="text-body-secondary">{record.location}</div>
-        </div>
-      ),
+      dataIndex: "logdate",
+      render: (text, record) => <p className="table-avatar font-medium">{getDate(text !== null ? text : "null")}</p>,
     },
     {
       title: "Status",
@@ -273,18 +267,18 @@ const AllRequests = () => {
       render: (text, record) => (
         <label
           className={
-            text === "REJECTED"
+            text === "rejected"
               ? "bg-red-100 text-red-600 text-xs font-medium px-4 py-0.5 rounded-full border border-red-500"
-              : text === "PENDING"
+              : text === "pending"
               ? "bg-orange-100 text-red-500 text-xs font-medium px-4 py-0.5 rounded-full border border-red-400"
-              : text === "Approved"
+              : text === "approved"
               ? "bg-green-100 text-green-800 text-xs font-medium px-4 py-0.5 rounded-full border border-green-500"
               : text === "IN REVIEW"
               ? "bg-blue-100 text-blue-600 text-xs font-medium px-4 py-0.5 rounded-full border border-blue-500"
               : "bg-blue-100 text-blue-600 text-xs font-medium px-4 py-0.5 rounded-full border border-blue-500"
           }
         >
-          {text}
+          {capitalizeText(text !== null ? text : "null")}
         </label>
       ),
     },
@@ -344,6 +338,7 @@ const AllRequests = () => {
                   value={card.value}
                   link={card.link}
                   descriptionColor={card.color}
+                  loading={card.loading}
                 />
               ))}
             </div>

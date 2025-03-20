@@ -84,7 +84,7 @@ const PricingCard = ({
       }
     } else {
       console.log("Not a popular plan");
-      navigate("/checkout");
+      navigate("/checkout/free");
     }
   };
 

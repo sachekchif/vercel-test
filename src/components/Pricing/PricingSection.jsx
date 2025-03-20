@@ -13,7 +13,7 @@ const PricingSection = () => {
       features: [
         'Get a professionally structured CV',
         'Receive a tailored cover letter',
-        'We’ll apply to 5 jobs on your behalf',
+        'We’ll apply to 2 jobs on your behalf',
         'Perfect for trying out our services and getting a feel for our expertise',
       ],
       buttonText: 'Select Plan',
@@ -25,7 +25,7 @@ const PricingSection = () => {
       priceNote: '/ month',
       description: 'Best for large scale uses and extended redistribution.',
       features: [
-        'Minimum of 50 job applications per month',
+        'Minimum of 20 job applications per month',
         'Unique and Professionally tailored CV, Cover Letter for each application',
         'Crafted follow-up emails to recruiters when available',
         'Dedicated support to ensure maximum visibility and impact',

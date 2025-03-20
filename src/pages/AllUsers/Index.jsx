@@ -115,7 +115,7 @@ const AllUsers = () => {
       } else {
         interval = setInterval(() => {
           refetchAllRequests(); // Resume auto-refresh
-        }, 30000);
+        }, 3000);
       }
     };
 
@@ -167,7 +167,7 @@ const AllUsers = () => {
 
   console.log("Filtered Users:", filteredUsers);
   // Count Users by Status
-  const activeUsersCount = usersData?.data.filter(
+  const activeUsersCount = usersData?.data?.filter(
     (user) => user.status === "active"
   ).length;
   const pendingUserCount = filteredUsers.filter(
@@ -214,7 +214,7 @@ const AllUsers = () => {
           userId: selectedUser.id,
         }).unwrap();
 
-        // Check if the statusCode is not "00"
+        
         if (response.statusCode !== "00") {
           message.error(response.statusMessage || "Failed to suspend user.");
           return; // Exit the function to prevent further execution
@@ -311,11 +311,6 @@ const AllUsers = () => {
       render: (text, record) => <p className="table-avatar">{getDate(text)}</p>,
     },
     {
-      title: "INTERVIEWS COUNT",
-      dataIndex: "interviewCount",
-      render: (text, record) => <p className="table-avatar">{text}</p>,
-    },
-    {
       title: "Status",
       dataIndex: "status",
       render: (text, record) => (
@@ -340,6 +335,9 @@ const AllUsers = () => {
       title: "Action",
       render: (text, record) => {
         const isDisabled = !canBlockUser && !canRestoreUser; // Disable if both are false
+        // console.log("Disabled", isDisabled);
+        console.log("Disabledtt", canBlockUser);
+        console.log("Disabledttgg", canRestoreUser);
         const buttonStyles = isDisabled
           ? "bg-gray-400 cursor-not-allowed"
           : "bg-red-500 hover:bg-red-600"; // Change color if disabled
@@ -387,7 +385,7 @@ const AllUsers = () => {
       <div className="px-8 py-8 sm:ml-64 bg-gray-50 w-full h-full">
         <main className="rounded-lg mt-14 mb-12l">
           <div className="mb-12">
-            <h1 className="mb-1 text-xl font-bold">ALL REQUESTS</h1>
+            <h1 className="mb-1 text-xl font-bold">ALL OUTSOURCE-APPLY USERS</h1>
           </div>
 
           <div className="w-full rounded-lg mb-12">

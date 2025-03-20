@@ -1,5 +1,5 @@
 import { Drawer, Skeleton } from "antd";
-import { getDate } from "../../utils/constants";
+import { capitalizeText, getDate } from "../../utils/constants";
 
 const StaffDetailDrawer = ({ isVisible, onClose, user, isLoading }) => {
   console.log("Account Details", user);
@@ -7,7 +7,7 @@ const StaffDetailDrawer = ({ isVisible, onClose, user, isLoading }) => {
 
   return (
     <Drawer
-      title="User Details"
+      title="Staff Details"
       placement="right"
       onClose={onClose}
       open={isVisible}
@@ -23,13 +23,13 @@ const StaffDetailDrawer = ({ isVisible, onClose, user, isLoading }) => {
       ) : userData ? (
         // Render user details when data is available
         <div className="flex flex-col mb-12">
-          <h2 className="text-2xl mb-2">{userData?.firstName} {userData?.lastName}</h2>
+          <h2 className="text-2xl mb-2">{capitalizeText(userData?.firstName + " " + userData?.lastName)}</h2>
           <h4 className="text-md text-purple-700 font-medium mb-4">
-            {userData?.role}
+            {capitalizeText(userData?.role)}
           </h4>
           <div className="flex leading-tight text-green-700 mb-4">
             <span className="bg-green-100 text-green-600 text-xs font-medium px-4 py-1 rounded-full border border-green-500">
-              {userData?.status}
+              {capitalizeText(userData?.status)}
             </span>
           </div>
 

@@ -1,5 +1,6 @@
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom"; // Import useParams
 import { Breadcrumb } from "antd";
-import React, { useState } from "react";
 import { CheckoutIcon, HomeIcon } from "../../utils/constants";
 import Navbar from "../../components/Navbar";
 import SmallPlanCard from "../../components/Checkout/SmallPlanCard";
@@ -7,8 +8,18 @@ import PaymentOptionCard from "../../components/Checkout/PaymentOptionCard";
 import SummaryCard from "../../components/Checkout/SummaryCard";
 
 const Checkout = () => {
+  const { planType } = useParams(); // Get the planType parameter from the URL
   const [selectedPlan, setSelectedPlan] = useState("");
   const [selectedOption, setSelectedOption] = useState("credit-card");
+
+  // Set the selected plan based on the URL parameter
+  useEffect(() => {
+    if (planType === "free") {
+      setSelectedPlan("hosting-small"); // Set to the free plan's value
+    } else if (planType === "premium") {
+      setSelectedPlan("hosting-big"); // Set to the premium plan's value
+    }
+  }, [planType]);
 
   const plans = [
     {
@@ -154,6 +165,7 @@ const Checkout = () => {
                       features={plan.features}
                       selected={selectedPlan === plan.value}
                       onChange={handlePlanChange}
+                      disabled={planType === "free" && plan.value !== "hosting-small"} // Disable premium plan on /checkout/free
                     />
                   ))}
                 </ul>

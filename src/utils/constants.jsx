@@ -3,20 +3,28 @@ import { useNavigate } from "react-router-dom";
 
 // src/utils/PermissionsService.js
 
-const userInformation = JSON.parse(sessionStorage.getItem("userInformation")) || {};
+const userInformation =
+  JSON.parse(sessionStorage.getItem("userInformation")) || {};
 const permissions = userInformation?.profile?.permissions || {};
 
 // Dynamically create and export variables for each permission
-export const canAccessTransactions = permissions.canAccessTransactions;
-export const canDeleteUser = permissions.canDeleteUser;
-export const canBlockUser = permissions.canBlockUser;
-export const canRestoreUser = permissions.canRestoreUser;
-export const canAddStaff = permissions.canAddStaff;
-export const canUpdateStaffRole = permissions.canUpdateStaffRole;
-export const canBlockStaff = permissions.canBlockStaff;
-export const canRestoreStaff = permissions.canRestoreStaff;
+export const canAccessTransactions = permissions?.canAccessTransactions;
+export const canDeleteUser = permissions?.canDeleteUser;
+export const canBlockUser = permissions?.canBlockUser;
+export const canRestoreUser = permissions?.canRestoreUser;
+export const canAddStaff = permissions?.canAddStaff;
+export const canUpdateStaffRole = permissions?.canUpdateStaffRole;
+export const canBlockStaff = permissions?.canBlockStaff;
+export const canRestoreStaff = permissions?.canRestoreStaff;
 
-
+export const convertToBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = (error) => reject(error);
+  });
+};
 
 export const capitalizeText = (text) => {
   if (!text) return ""; // Return an empty string if the input is falsy
@@ -27,7 +35,10 @@ export const capitalizeText = (text) => {
   if (wordCount > 4) {
     // If more than 4 words, capitalize only the first word
     return (
-      words[0].charAt(0).toUpperCase() + words[0].slice(1) + " " + words.slice(1).join(" ")
+      words[0].charAt(0).toUpperCase() +
+      words[0].slice(1) +
+      " " +
+      words.slice(1).join(" ")
     );
   } else {
     // If 4 or fewer words, capitalize each word
@@ -37,31 +48,41 @@ export const capitalizeText = (text) => {
   }
 };
 
-
-export const getNestedPropertyOrNA = (obj, ...keys) => {
- let current = obj;
-
- // Traverse the nested structure using the keys
- for (let key of keys) {
-   if (current === null || current === undefined) {
-     return "N/A"; // If any level is null/undefined, return "N/A"
-   }
-   current = current[key]; // Move to the next nested level
- }
-
- // Return the final value or "N/A" if it's null or undefined
- return current ?? "N/A";
-};
-export const logout = () => {
-  const navigate = useNavigate(); // Initialize navigation
-
-  console.log("🚪 Logging out...");
-  sessionStorage.removeItem("isScheduled"); // Reset schedule flag
+export const clearSessionStorage = () => {
+  sessionStorage.removeItem("isScheduled");
   sessionStorage.removeItem("userInformation");
   sessionStorage.removeItem("access_token");
   sessionStorage.removeItem("refresh_token");
+};
 
-  navigate("/outsource-apply/login"); // Redirect to login page
+export const getNestedPropertyOrNA = (obj, ...keys) => {
+  let current = obj;
+
+  // Traverse the nested structure using the keys
+  for (let key of keys) {
+    if (current === null || current === undefined) {
+      return "N/A"; // If any level is null/undefined, return "N/A"
+    }
+    current = current[key]; // Move to the next nested level
+  }
+
+  // Return the final value or "N/A" if it's null or undefined
+  return current ?? "N/A";
+};
+export const useLogout = () => {
+  const navigate = useNavigate();
+
+  const logout = () => {
+    console.log("🚪 Logging out...");
+    sessionStorage.removeItem("isScheduled");
+    sessionStorage.removeItem("userInformation");
+    sessionStorage.removeItem("access_token");
+    sessionStorage.removeItem("refresh_token");
+
+    navigate("/login"); // Redirect to login page
+  };
+
+  return logout;
 };
 
 export const getDate = (inputDate) => {
@@ -139,6 +160,23 @@ export const onShowSizeChange = (current, size) => {
   console.log(`Current: ${current}, Size: ${size}`);
 };
 // src/components/Icons.js
+
+export const DocIcon = () => {
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth="1.5"
+    stroke="currentColor"
+    className="size-6"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
+    />
+  </svg>;
+};
 
 export const EditIcon = () => (
   <svg

@@ -2,7 +2,45 @@
 @tailwind components;
 @tailwind utilities;
 
+.ant-table-thead .ant-table-cell {
+  background-color: #e5e7eb !important;
+  border: 2px solid #e5e7eb;
+}
 
+.border-primary {
+  /* background-color: #e5e7eb !important; */
+  border: 1px solid #e5e7eb !important;
+}
+.google-spin .ant-spin-dot-item {
+  background-color: #db4437; /* Google Red */
+  animation: google-spin 1.2s infinite ease-in-out;
+}
+
+.google-spin .ant-spin-dot-item:nth-child(2) {
+  background-color: #0f9d58; /* Google Green */
+  animation-delay: -0.9s;
+}
+
+.google-spin .ant-spin-dot-item:nth-child(3) {
+  background-color: #f4b400; /* Google Yellow */
+  animation-delay: -0.6s;
+}
+
+.google-spin .ant-spin-dot-item:nth-child(4) {
+  background-color: #4285f4; /* Google Blue */
+  animation-delay: -0.3s;
+}
+
+@keyframes google-spin {
+  0%,
+  80%,
+  100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}
 
 .tooltip-container {
   position: relative;
@@ -173,13 +211,20 @@ background-size: cover;
 }
 
 .hero_bg {
-  background: radial-gradient(circle at 50% 50%, #fcf1ff 25%, transparent 50%), 
-  radial-gradient(circle at 70% 40%, #f8f0ff 20%, transparent 50%), 
-  radial-gradient(circle at 30% 60%, #f5ebf2 20%, transparent 50%), 
-  radial-gradient(circle at 80% 80%, #f0eaff 15%, transparent 50%), 
-  /* radial-gradient(circle at 20% 20%, #ffeaf8 15%, transparent 50%),  */
-  radial-gradient(circle at 50% 50%, #ffffff 70%, transparent 100%);
-background-color: #ffffff; /* Predominantly white background */
+  background: radial-gradient(circle at 50% 50%, #fcf1ff 25%, transparent 50%),
+      radial-gradient(circle at 70% 40%, #f8f0ff 20%, transparent 50%),
+      radial-gradient(circle at 30% 60%, #f5ebf2 20%, transparent 50%),
+      radial-gradient(circle at 80% 80%, #f0eaff 15%, transparent 50%),
+      /* radial-gradient(circle at 20% 20%, #ffeaf8 15%, transparent 50%),  */
+      radial-gradient(circle at 50% 50%, #ffffff 70%, transparent 100%);
+  background-color: #ffffff;
+  /* Predominantly white background */
+}
+
+.font-DMSerifDisplay-bold {
+  font-family: 'DM Serif Display', serif;
+  font-weight: 400; /* Regular weight */
+  text-shadow: 1px 0 0 currentColor, -1px 0 0 currentColor, 0 1px 0 currentColor, 0 -1px 0 currentColor; /* Simulate boldness */
 }
 
 .fading_edge {

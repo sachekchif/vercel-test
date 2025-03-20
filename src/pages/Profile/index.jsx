@@ -38,7 +38,7 @@ const Profile = () => {
           },
         ]
       : []),
-    ...(userRole === "admin" || userRole === "super admin"
+    ...(userRole === "admin" || userRole === "super_admin"
       ? [
           {
             id: "permissions",

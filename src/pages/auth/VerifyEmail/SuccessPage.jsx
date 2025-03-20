@@ -15,7 +15,7 @@ const SuccessPage = () => {
         <div className="flex flex-col justify-start px-6 pt-8">
           <div className="md:p-4 sm:p-4 space-y-8">
             <div className="flex text-gray-700 mb-5">
-              <a href="/">
+              {/* <a href="/">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -30,7 +30,7 @@ const SuccessPage = () => {
                     d="M11.25 9l-3 3m0 0l3 3m-3-3h7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-              </a>
+              </a> */}
             </div>
           </div>
 
@@ -50,14 +50,14 @@ const SuccessPage = () => {
                 <div className="flex items-center justify-center mb-4">
                   <div className="mb-8 max-w-md">
                     <h2 className="text-sm font-medium text-center">
-                      We’ve sent you an email with instructions to reset your
-                      password. Please check your inbox (and spam folder, just
-                      in case) for a link to complete the process.
+                      
+
+Your email has been successfully verified! Your account is now fully activated. You can proceed to log in and start using Outsource Apply.
                     </h2>
                   </div>
                 </div>
 
-                <Link to="/outsource-apply/login">
+                <Link to="/login">
                   <CustomButton>Proceed to Login</CustomButton>
                 </Link>
               </forn>

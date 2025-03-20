@@ -4,10 +4,11 @@ import CustomInput from "../CustomRequestInput";
 import Spacer from "../../utils/Spacer";
 import { toast } from "sonner";
 import { useCreateRequestMutation } from "../../services/apiSlice";
-import { Button, Input, message, Upload } from "antd";
+import { Button, Input, message } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import FileUpload from "../FileUpload";
 import { useNavigate } from "react-router-dom";
+import CustomLoadingButton from "../CustomLoadingButton";
 const { TextArea } = Input;
 
 const modalStyles = {
@@ -32,7 +33,6 @@ Modal.setAppElement("#root");
 
 const NewJobRequestModal = ({ isOpen, onClose, profile, job }) => {
   const navigate = useNavigate();
-  // console.log("New Job Request", job);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -43,31 +43,64 @@ const NewJobRequestModal = ({ isOpen, onClose, profile, job }) => {
     jobUrl: "",
     additionalNotes: "",
     document: null,
+    useExistingCv: false,
+    needsCoverLetter: false,
+    needsFollowUpMail: false,
   });
-
-  // console.log(profile);
 
   const [createRequest, { isLoading, isSuccess, isError, error }] =
     useCreateRequestMutation();
 
+  const defaultFormData = {
+    firstName: profile?.firstName || "",
+    lastName: profile?.lastName || "",
+    email: profile?.email || "",
+    phone: profile?.phone || "",
+    jobTitle: job?.cleaned_job_title || "",
+    jobUrl: job?.incoming_click_url || "",
+    companyName: job?.company || "",
+    additionalNotes: "",
+    document: null,
+    useExistingCv: false,
+    needsCoverLetter: false,
+    needsFollowUpMail: false,
+  };
+
   useEffect(() => {
-    if (profile) {
-      setFormData({
-        firstName: profile.firstName || "",
-        lastName: profile.lastName || "",
-        email: profile.email || "",
-        phone: profile.phone || "",
-        jobTitle: job?.cleaned_job_title || "",
-        jobUrl: job?.incoming_click_url || "",
-        companyName: job?.company || "",
-        additionalNotes: "",
-        document: null,
-        useExistingCv: false,
-        needsCoverLetter: false,
-        needsFollowUpMail: false,
-      });
+    if (isOpen) {
+      // Fetch user information from session storage
+      const userInfo = JSON.parse(sessionStorage.getItem("userInformation"));
+      const storedJob = localStorage.getItem("selectedJob");
+      console.log("ff", userInfo);
+
+      if (userInfo) {
+        setFormData((prev) => ({
+          ...prev,
+          firstName: userInfo.profile.firstName || "",
+          lastName: userInfo.profile.lastName || "",
+          email: userInfo.profile.email || "",
+          phone: userInfo.profile.phone || "",
+        }));
+      }
+
+      if (storedJob) {
+        const parsedJob = JSON.parse(storedJob);
+        setFormData((prev) => ({
+          ...prev,
+          jobTitle: parsedJob.title || "",
+          companyName: parsedJob.company || "",
+        }));
+      } else if (job) {
+        setFormData(defaultFormData);
+      }
     }
-  }, [profile, job]);
+  }, [isOpen, job, profile]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setFormData(defaultFormData);
+    }
+  }, [isOpen]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -79,27 +112,21 @@ const NewJobRequestModal = ({ isOpen, onClose, profile, job }) => {
     setFormData((prev) => ({ ...prev, [name]: checked }));
   };
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("click");
 
     // Check subscription
     if (profile?.subscription === "free") {
       console.log("subs", profile.subscription);
-      navigate("/outsource-apply/checkout");
+      toast.error(
+        "You have not subscribed to Outsource Apply yet. Redirecting you to subscribe..."
+      );
+      setTimeout(() => {
+        // window.open("/checkout", "_blank");
+        navigate("/checkout"); // Redirect to checkout
+      }, 2000); // Allow time for the toast to show
       return; // Exit the function
     }
-
-    // const payload = {
-    //   jobTitle: formData.jobTitle,
-    //   jobUrl: formData.jobUrl,
-    //   additionalNotes: formData.additionalNotes,
-    //   docRef: formData.document,
-    //   useExistingCv: formData.useExistingCv,
-    //   needsCoverLetter: formData.needsCoverLetter,
-    //   needsFollowUpMail: formData.needsFollowUpMail,
-    // };
 
     const payload = {
       jobTitle: formData.jobTitle,
@@ -111,16 +138,17 @@ const NewJobRequestModal = ({ isOpen, onClose, profile, job }) => {
       needsCoverLetter: formData.needsCoverLetter,
       needsFollowUpMail: formData.needsFollowUpMail,
     };
-    console.log("payload", payload);
-    
 
     try {
       const response = await createRequest(payload).unwrap();
-      if (response?.data?.statusCode === "00") {
-        message.error("File size must not exceed 1MB.");
-        navigate("/all-requests")
-        onClose(); // Close the modal on success
-      } else if (response.statusCode === "96") {
+      if (response?.statusCode === "00") {
+        message.success("Request has been created successfully");
+        localStorage.removeItem("selectedJob"); // Clear localStorage after success
+        setTimeout(() => {
+          navigate("/all-requests");
+        }, 1000);
+        onClose();
+      } else if (response?.statusCode === "96") {
         const message =
           response?.data || response.statusMessage || "Unknown error.";
         toast.error(message);
@@ -128,39 +156,11 @@ const NewJobRequestModal = ({ isOpen, onClose, profile, job }) => {
     } catch (err) {
       toast.error("An error occurred while creating the request.");
     }
-  
-  };
-
-  const modalStyles = {
-    overlay: {
-      backgroundColor: "rgba(0, 0, 0, 0.5)",
-      zIndex: 1000,
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    content: {
-      width: "90%",
-      maxWidth: "600px",
-      maxHeight: "90%",
-      borderRadius: "10px",
-      padding: 0,
-      inset: "unset",
-    },
-  };
-
-  const modalHeaderStyle = {
-    position: "sticky",
-    top: 0,
-    zIndex: 1, // Ensures it stays above the rest of the content
-    backgroundColor: "#fff", // You can set the background color to match your design
-    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)", // Optional shadow for separation
   };
 
   return (
     <Modal isOpen={isOpen} onRequestClose={onClose} style={modalStyles}>
       <div className="bg-white rounded-lg shadow max-h-full flex flex-col">
-        {/* Modal header */}
         <div
           className="flex items-center justify-between p-4 md:p-5 border-b rounded-t"
           style={{
@@ -171,7 +171,18 @@ const NewJobRequestModal = ({ isOpen, onClose, profile, job }) => {
             boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
           }}
         >
-          <h3 className="text-xl font-medium text-gray-900">New Job Request</h3>
+          <h3 className="text-xl font-medium text-gray-900">
+            New Job Request{" "}
+            {formData.jobTitle ? (
+              <>
+                For{" "}
+                <span className="text-purple-600">{formData?.jobTitle}</span> in{" "}
+                <span className="text-purple-600">{formData?.companyName}</span>
+              </>
+            ) : (
+              ""
+            )}
+          </h3>
           <button
             type="button"
             onClick={onClose}
@@ -196,7 +207,6 @@ const NewJobRequestModal = ({ isOpen, onClose, profile, job }) => {
           </button>
         </div>
 
-        {/* Scrollable form body */}
         <div
           className="p-6 overflow-y-auto flex-grow"
           style={{ maxHeight: "70vh" }}
@@ -240,20 +250,18 @@ const NewJobRequestModal = ({ isOpen, onClose, profile, job }) => {
               value={formData.jobTitle}
               placeholder="Enter a Job Title for this role. E.g. UI/UX Designer"
               onChange={handleInputChange}
-              disabled={job?.cleaned_job_title}
+              disabled={!!formData.jobTitle}
             />
             <Spacer size="24px" />
-
             <CustomInput
               label="Company Name"
               name="companyName"
               value={formData.companyName}
               placeholder="Enter the your employer's company name"
               onChange={handleInputChange}
-              disabled={job?.company}
+              disabled={!!formData.companyName}
             />
             <Spacer size="24px" />
-
             <CustomInput
               label="Job URL"
               name="jobUrl"
@@ -263,12 +271,14 @@ const NewJobRequestModal = ({ isOpen, onClose, profile, job }) => {
               disabled={job?.incoming_click_url}
             />
             <Spacer size="24px" />
-
             <div className="mb-4">
-            <FileUpload formData={formData} setFormData={setFormData} profile={profile} />
+              <FileUpload
+                formData={formData}
+                setFormData={setFormData}
+                profile={profile}
+              />
             </div>
             <Spacer size="24px" />
-
             <div className="flex items-center space-x-2">
               <input
                 type="checkbox"
@@ -281,7 +291,6 @@ const NewJobRequestModal = ({ isOpen, onClose, profile, job }) => {
               <label htmlFor="needsCoverLetter">Needs Cover Letter</label>
             </div>
             <Spacer size="16px" />
-
             <div className="flex items-center space-x-2">
               <input
                 type="checkbox"
@@ -294,7 +303,6 @@ const NewJobRequestModal = ({ isOpen, onClose, profile, job }) => {
               <label htmlFor="needsFollowUpMail">Needs Follow-Up Mail</label>
             </div>
             <Spacer size="24px" />
-
             <label
               htmlFor="additionalNotes"
               className="text-[#000] font-[500] text-[14px] mb-1"
@@ -302,19 +310,15 @@ const NewJobRequestModal = ({ isOpen, onClose, profile, job }) => {
               Additional Notes
             </label>
             <TextArea
-              name="additionalNotes" // Add this line
+              name="additionalNotes"
               value={formData.additionalNotes}
               onChange={handleInputChange}
               placeholder="Additional Note"
-              autoSize={{
-                minRows: 3,
-                maxRows: 5,
-              }}
+              autoSize={{ minRows: 3, maxRows: 5 }}
             />
           </form>
         </div>
 
-        {/* Modal footer */}
         <div
           className="flex justify-center p-4 border-t"
           style={{
@@ -324,14 +328,9 @@ const NewJobRequestModal = ({ isOpen, onClose, profile, job }) => {
             boxShadow: "0 -2px 4px rgba(0, 0, 0, 0.1)",
           }}
         >
-          <button
-            type="submit"
-            onClick={handleSubmit}
-            className="py-2 px-16 rounded text-sm text-white bg-purple-700 hover:bg-purple-600"
-            disabled={isLoading}
-          >
-            {isLoading ? "Submitting..." : "Submit Request"}
-          </button>
+          <CustomLoadingButton onClick={handleSubmit} isLoading={isLoading}>
+            Submit Request
+          </CustomLoadingButton>
         </div>
       </div>
     </Modal>

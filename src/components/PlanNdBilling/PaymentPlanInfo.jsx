@@ -2,11 +2,13 @@ import React, { useState, useEffect } from "react";
 import { Modal, Button, Tag } from "antd";
 import { toast } from "sonner"; // Import Sonner for toast notifications
 import { useLazyCancelSubscriptionQuery } from "../../services/apiSlice";
+import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
 
 const PaymentPlanInfo = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [price, setPrice] = useState(25); // Default price
   const [triggerCancelSubscription, { data, error, isLoading }] = useLazyCancelSubscriptionQuery();
+  const navigate = useNavigate(); // Hook for navigation
 
   useEffect(() => {
     // Fetch user information from session storage
@@ -41,6 +43,10 @@ const PaymentPlanInfo = () => {
 
   const handleCancel = () => setIsModalVisible(false);
 
+  const handleUpgrade = () => {
+    navigate("/checkout/premium"); // Navigate to the pricing or checkout page
+  };
+
   return (
     <div className="col-span-2 flex flex-col justify-between">
       {/* Form for displaying the payment information */}
@@ -59,15 +65,28 @@ const PaymentPlanInfo = () => {
           </div>
         </div>
 
-        <div className="flex justify-start">
-          <Button
-            type="primary"
-            onClick={showModal}
-            className="bg-purple-700 hover:!bg-purple-600 font-medium rounded-lg text-sm px-16 py-2.5"
-          >
-            Cancel Subscription
-          </Button>
-        </div>
+        {/* Conditionally render buttons based on subscription type */}
+        {price === 0 ? ( // If subscription is free, show Upgrade to Premium button
+          <div className="flex justify-start">
+            <Button
+              type="primary"
+              onClick={handleUpgrade}
+              className="bg-green-600 hover:!bg-green-500 font-medium rounded-lg text-sm px-16 py-2.5"
+            >
+              Upgrade to Premium
+            </Button>
+          </div>
+        ) : ( // If subscription is paid, show Cancel Subscription button
+          <div className="flex justify-start">
+            <Button
+              type="primary"
+              onClick={showModal}
+              className="bg-purple-700 hover:!bg-purple-600 font-medium rounded-lg text-sm px-16 py-2.5"
+            >
+              Cancel Subscription
+            </Button>
+          </div>
+        )}
       </form>
 
       {/* Modal for cancel confirmation */}

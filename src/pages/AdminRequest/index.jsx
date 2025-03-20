@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from "react";
-import Sidebar from "../../components/Sidebar";
-import Navbar from "../../components/Navbar";
+import React, { useState, useMemo, useEffect } from "react";
+import Sidebar from "../../components/Sidebar.jsx";
+import Navbar from "../../components/Navbar.jsx";
 import DashboardCard from "../../components/dashboard/DashboardCard.jsx";
 import DropdownMenu from "../../components/DropdownMenu.jsx";
 import CustomButton from "../../components/CustomButton.jsx";
@@ -13,10 +13,12 @@ import {
   Menu,
   Dropdown,
   Button,
+  message,
 } from "antd";
 import { BulletList } from "react-content-loader";
 import { itemRender, onShowSizeChange } from "../../components/Pagination.jsx";
 import {
+  capitalizeText,
   CompletedIcon,
   DeleteIcon,
   EditIcon,
@@ -35,10 +37,11 @@ import {
   useFetchAllUsersQuery,
   useFetchRequestByIdQuery,
   useFetchUserByIdQuery,
+  useUpdateRequestInReviewMutation,
 } from "../../services/apiSlice.jsx";
 import dayjs from "dayjs";
 import AccountDetailsDrawer from "../../components/Requests/AccountDetailsDrawer.jsx";
-import { DownOutlined } from "@ant-design/icons";
+import { DownOutlined, LoadingOutlined } from "@ant-design/icons";
 import UserDetailDrawer from "../../components/Requests/UserDetailsDrawer.jsx";
 import NewModalButton from "../../components/Requests/NewRequest.jsx";
 import NewStaffModol from "../../components/Staff/NewStaffModal.jsx";
@@ -56,10 +59,11 @@ const AdminRequest = () => {
   const [viewId, setViewId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [editModalVisible, setEditModalVisible] = useState(false);
+  const [updatingRequestId, setUpdatingRequestId] = useState(null);
 
   const getDateTo = getCurrentDate(); // Use the current date as the end date
   const getDateFrom = new Date(getDateTo);
-  getDateFrom.setDate(getDateFrom.getDate() - 7); // Subtract 7 dayas from the dateTo
+  getDateFrom.setDate(getDateFrom.getDate() - 7); // Subtract 7 days from the dateTo
 
   // Format the dateTo and dateFrom to the desired string format (optional)
   // const dateFrom = getDateFrom.toISOString().split('T')[0]; // YYYY-MM-DD
@@ -84,50 +88,144 @@ const AdminRequest = () => {
     data: pendingData,
     error: pendingError,
     isLoading: pendingLoading,
+    refetch: pendingRefetch,
   } = useFetchAllRequestsQuery({ dateTo, dateFrom, status: "pending" });
 
   const {
     data: completedData,
     error: completedError,
     isLoading: completedLoading,
+    refetch: completeRefetch,
   } = useFetchAllRequestsQuery({ dateTo, dateFrom, status: "completed" });
 
   const {
     data: rejectedData,
     error: rejectedError,
-    isLoading: rejectedLoading,
+    loading: rejectedLoading,
+    refetch: rejectedRefetch,
   } = useFetchAllRequestsQuery({ dateTo, dateFrom, status: "rejected" });
 
   const {
     data: inReviewData,
     error: inReviewError,
-    isLoading: inReviewLoading,
+    loading: inReviewLoading,
+    refetch: inReviewRefetch,
   } = useFetchAllRequestsQuery({ dateTo, dateFrom, status: "in_review" });
 
+  const {
+    data: reviewedData,
+    error: reviewedError,
+    loading: reviewedLoading,
+    refetch: reviewedRefetch,
+  } = useFetchAllRequestsQuery({ dateTo, dateFrom, status: "reviewed" });
+
+  // console.log("Loading", reviewedData);
+  
+
+  const [updateRequestInReview, { isLoading: isUpdating }] =
+    useUpdateRequestInReviewMutation();
+
+  // Combined refetch function
+  const refetchAllRequests = async () => {
+    if (
+      pendingLoading ||
+      completedLoading ||
+      rejectedLoading ||
+      inReviewLoading || 
+      reviewedLoading
+    ) {
+      return; // Skip refetch if data is already being fetched
+    }
+
+    try {
+      await Promise.all([
+        pendingRefetch(),
+        completeRefetch(),
+        rejectedRefetch(),
+        inReviewRefetch(),
+        reviewedRefetch(),
+      ]);
+      // console.log("All requests refetched successfully!");
+    } catch (error) {
+      console.error("Error refetching requests:", error);
+    }
+  };
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        clearInterval(interval); // Pause auto-refresh
+      } else {
+        interval = setInterval(() => {
+          refetchAllRequests(); // Resume auto-refresh
+        }, 30000);
+      }
+    };
+
+    let interval = setInterval(() => {
+      refetchAllRequests(); // Refetch data every X seconds
+    }, 30000); // 30 seconds
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [pendingRefetch, completeRefetch, rejectedRefetch, inReviewRefetch, reviewedData]);
+
   // Combine loading and error states
-  const isLoading =
-    pendingLoading || completedLoading || rejectedLoading || inReviewLoading;
-  const error =
-    pendingError || completedError || rejectedError || inReviewError;
+
 
   const totalLength =
     (pendingData?.data?.length || 0) +
     (completedData?.data?.length || 0) +
     (rejectedData?.data?.length || 0) +
-    (inReviewData?.data?.length || 0);
-  console.log("Pending Requests:", pendingData);
-  console.log("Completed Requests:", completedData);
-  console.log("Rejected Requests:", rejectedData);
-  console.log("In Review Requests:", inReviewData);
+    (inReviewData?.data?.length || 0) +
+    (reviewedData?.data?.length || 0);
+  // console.log("Pending Requests:", pendingData);
+  // console.log("Completed Requests:", completedData);
+  // console.log("Rejected Requests:", rejectedData);
+  // console.log("In Review Requests:", inReviewData);
+
+  const handleTreatRequest = async (id) => {
+    const requestData = {
+      requestId: id,
+    };
+
+    try {
+      setUpdatingRequestId(id);
+      // Call the mutation to update the request status
+      const response = await updateRequestInReview(requestData).unwrap();
+      // console.log("Response:", response);
+
+      if (response.statusCode === "00") {
+        message.success("Request updated successfully!");
+        refetchAllRequests(); // Refetch all endpoints to update the UI
+      } else {
+        message.error(response.statusMessage || "Failed to update request.");
+      }
+    } catch (error) {
+      message.error("Failed to update request.");
+      console.error("Error updating request:", error);
+    }finally {
+      // Clear the updating request ID
+      setUpdatingRequestId(null);
+    }
+  };
 
   const totalRequests = [
     ...(pendingData?.data || []),
     ...(completedData?.data || []),
     ...(rejectedData?.data || []),
-    ...(inReviewData?.data || []),
+    // ...(inReviewData?.data || []),
+    ...(reviewedData?.data || []),
   ];
 
-  console.log("Total Requests:", totalRequests);
+  // console.log("Totalaa Requests:", totalRequests);
+  // Retrieve user information from sessionStorage
+  const userDataInfo = JSON.parse(sessionStorage.getItem("userInformation"));
+
 
   // Handle Date Range Change
   const handleDateChange = (dates, dateStrings) => {
@@ -177,14 +275,20 @@ const AdminRequest = () => {
     return filtered.sort(
       (a, b) => new Date(b?.logdate || 0) - new Date(a?.logdate || 0)
     );
-  }, [usersData, startDate, endDate, status, searchTerm]);
+  }, [totalRequests, startDate, endDate, status, searchTerm]);
 
-  console.log("Filtered Users:", filteredUsers);
-  
+  // console.log("Filtered Users:", filteredUsers);
+  // Count Users by Status
+  const activeUsersCount = usersData?.data?.filter(
+    (user) => user.status === "active"
+  ).length;
+  const BlockedUserCount = filteredUsers.filter(
+    (user) => user.status === "pending"
+  ).length;
 
   const showDrawer = (id) => {
-    console.log("yyy",id);
-    
+    console.log("yyy", id);
+
     setViewId(id);
     setDrawerIsVisible(true);
   };
@@ -195,7 +299,7 @@ const AdminRequest = () => {
   };
 
   const handleEditRequest = (record) => {
-    setViewId(record.id);
+    setViewId(record);
     setEditModalVisible(true);
   };
   const toggleModal = () => setModalOpen(!modalOpen);
@@ -208,6 +312,7 @@ const AdminRequest = () => {
       link: "all-requests",
       color: "",
       icon: <TotalReqIcon />,
+      loading: usersLoading,
     },
     {
       label: "Approved Requests",
@@ -216,6 +321,7 @@ const AdminRequest = () => {
       link: "all_users.html",
       color: "text-green-500",
       icon: <CompletedIcon />,
+      loading: usersLoading,
     },
     {
       label: "Pending Requests",
@@ -224,6 +330,7 @@ const AdminRequest = () => {
       link: "all_staff.html",
       color: "text-amber-500",
       icon: <PendingIcon />,
+      loading: usersLoading,
     },
     {
       label: "Rejected Requests",
@@ -232,6 +339,7 @@ const AdminRequest = () => {
       link: "all_staff.html",
       color: "text-red-500",
       icon: <RejectedIcon />,
+      loading: usersLoading,
     },
   ];
   const columns = [
@@ -255,15 +363,15 @@ const AdminRequest = () => {
     },
     {
       title: "Application Date",
-      dataIndex: "applicationDate",
-      render: (text, record) => <p className="table-avatar">{text}</p>,
+      dataIndex: "logdatetime",
+      render: (text, record) => <p className="table-avatar">{getDate(text)}</p>,
     },
     {
-      title: "Company Name",
+      title: "Initiated By",
       dataIndex: "companyName",
       render: (text, record, index) => (
         <div className="flex-column">
-          <div className="mb-1">{record.companyName}</div>
+          <div className="mb-1">{record.reveiwedByName}</div>
           <div className="text-body-secondary">{record.location}</div>
         </div>
       ),
@@ -276,46 +384,103 @@ const AdminRequest = () => {
           className={
             text === "REJECTED"
               ? "bg-red-100 text-red-600 text-xs font-medium px-4 py-0.5 rounded-full border border-red-500"
-              : text === "PENDING"
+              : text === "pending"
               ? "bg-orange-100 text-red-500 text-xs font-medium px-4 py-0.5 rounded-full border border-red-400"
-              : text === "Approved"
+              : text === "completed"
               ? "bg-green-100 text-green-800 text-xs font-medium px-4 py-0.5 rounded-full border border-green-500"
               : text === "IN REVIEW"
               ? "bg-blue-100 text-blue-600 text-xs font-medium px-4 py-0.5 rounded-full border border-blue-500"
               : "bg-blue-100 text-blue-600 text-xs font-medium px-4 py-0.5 rounded-full border border-blue-500"
           }
         >
-          {text}
+          {capitalizeText(text)}
         </label>
       ),
     },
     {
-      title: "Action",
-      render: (text, record) => (
-        <div className="flex items-center justify-start">
-          <button
-            onClick={() => showDrawer(record.id)}
-            className="bg-blue-500 hover:bg-blue-600 text-white font-medium rounded me-2 items-center justify-center flex px-2 py-2"
-          >
-            <ViewIcon />
-          </button>
-          <button
-            onClick={() => handleEditRequest(record)}
-            type="button"
-            className="bg-gray-500 hover:bg-gray-600 text-white font-medium rounded me-2 items-center justify-center flex px-2 py-2"
-          >
-            <EditIcon />
-          </button>
-
-          <button
-            onClick={toggleModal}
-            className="bg-red-500 hover:bg-red-600 text-white font-medium rounded me-2 items-center justify-center flex px-2 py-2"
-          >
-            <DeleteIcon />
-          </button>
-        </div>
-      ),
+      title: "Treat",
+      render: (text, record) => {
+        // Check if the user is a superadmin
+        const isSuperAdmin = userDataInfo?.profile?.role === "super_admin";
+    
+        // Show "Treat" button only if status is "pending"
+        if (record.status === "pending") {
+          return (
+            <button
+              onClick={() => handleTreatRequest(record.id)}
+              className={`font-medium rounded border-none items-center justify-center flex px-2 py-1 ${
+                updatingRequestId === record.id
+                  ? "bg-gray-300 border-gray-500 text-gray-500 cursor-not-allowed"
+                  : isSuperAdmin
+                  ? "bg-gray-200 text-gray-500 border-gray-500 border-1 cursor-not-allowed" // Disabled style for superadmin
+                  : "bg-gray-800 hover:bg-black text-white hover:border-gray-800 hover:border-2"
+              }`}
+              disabled={updatingRequestId === record.id || isSuperAdmin} // Disable for superadmin
+            >
+              {updatingRequestId === record.id ? (
+                <span className="flex items-center text-gray-500 gap-2">
+                  <Spin
+                    indicator={<LoadingOutlined twoToneColor="#6b7280" spin />}
+                    size="small"
+                  />{" "}
+                  Loading...
+                </span>
+              ) : (
+                "Treat"
+              )}
+            </button>
+          );
+        } else if (record.status === "in_review") {
+          return (
+            <button
+              disabled // Disable the button if needed
+              className="bg-gray-200 text-gray-500 border-gray-500 border-1 rounded font-normal items-center justify-center flex px-2 py-1 cursor-not-allowed"
+            >
+              Treating...
+            </button>
+          );
+        }
+        return null; // Return null if status is not "pending"
+      },
     },
+    {
+      title: "Action",
+      render: (text, record) => {
+
+        return (
+          <div className="flex items-center justify-start">
+            {/* View Button */}
+            <button
+              onClick={() => showDrawer(record.id)}
+              className="bg-blue-500 hover:bg-blue-600 text-white font-medium rounded me-2 items-center justify-center flex px-2 py-2"
+            >
+              <ViewIcon />
+            </button>
+
+            {/* Edit Button (Conditional) */}
+            {record.status === "in_review" &&
+            (userDataInfo?.profile?.firstName + " " + userDataInfo?.profile?.lastName ) === record?.reveiwedByName ? (
+              <button
+                onClick={() => handleEditRequest(record?.id)}
+                type="button"
+                className="bg-gray-500 hover:bg-gray-600 text-white font-medium rounded me-2 items-center justify-center flex px-2 py-2"
+              >
+                <EditIcon />
+              </button>
+            ) : null}
+
+            {/* Delete Button */}
+            {/* <button
+              onClick={toggleModal}
+              className="bg-red-500 hover:bg-red-600 text-white font-medium rounded me-2 items-center justify-center flex px-2 py-2"
+            >
+              <DeleteIcon />
+            </button> */}
+          </div>
+        );
+      },
+    },
+    
   ];
 
   const menu = (
@@ -406,17 +571,18 @@ const AdminRequest = () => {
           </div>
 
           <AccountDetailsDrawer
-              isVisible={drawerIsVisible}
-              onClose={closeDrawer}
-              user={userData} // Pass the user data to the drawer
-              isLoading={userLoading} // Pass loading state to show skeleton
-              error={userError} // Pass error
-            />
-            <EditRequestModal
-              isOpen={editModalVisible}
-              onClose={() => setEditModalVisible(false)}
-              profile={userData}
-            />
+            isVisible={drawerIsVisible}
+            onClose={closeDrawer}
+            user={userData} // Pass the user data to the drawer
+            isLoading={userLoading} // Pass loading state to show skeleton
+            error={userError} // Pass error
+          />
+          <EditRequestModal
+            isOpen={editModalVisible}
+            onClose={() => setEditModalVisible(false)}
+            profile={userData}
+            isLoading={userLoading}
+          />
         </main>
       </div>
     </div>

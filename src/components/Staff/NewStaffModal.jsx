@@ -4,6 +4,7 @@ import CustomInput from "../CustomRequestInput";
 import Spacer from "../../utils/Spacer";
 import { toast } from "sonner";
 import { useCreateStaffRequestMutation } from "../../services/apiSlice";
+import CustomLoadingButton from "../CustomLoadingButton";
 
 const modalStyles = {
   overlay: {
@@ -220,14 +221,10 @@ const NewStaffModal = ({ isOpen, onClose }) => {
 
         {/* Modal footer */}
         <div className="flex justify-center p-4">
-          <button
-            type="submit"
-            className="py-2 px-16 rounded text-sm text-white bg-purple-700 hover:bg-purple-600"
-            disabled={isLoading}
-            onClick={handleSubmit}
-          >
-            {isLoading ? "Submitting..." : "Create Staff"}
-          </button>
+          
+          <CustomLoadingButton onClick={handleSubmit} isLoading={isLoading}>
+            Create Staff
+          </CustomLoadingButton>
         </div>
       </div>
     </Modal>

@@ -5,6 +5,13 @@
   text-align: center;
 } */
 
+.font-DMSerifDisplay-bold {
+  background-color: blue;
+  font-family: 'DM Serif Display', serif;
+  font-weight: 400; /* Regular weight */
+  text-shadow: 1px 0 0 currentColor, -1px 0 0 currentColor, 0 1px 0 currentColor, 0 -1px 0 currentColor; /* Simulate boldness */
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;

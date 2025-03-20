@@ -6,6 +6,7 @@ import { BulletList } from "react-content-loader";
 import { Table } from "antd";
 import { itemRender, onShowSizeChange } from "../../components/Pagination.jsx";
 import {
+  capitalizeText,
   DarkAllStaffIcon,
   DarkAllUsersIcon,
   getCurrentDate,
@@ -59,6 +60,12 @@ const AdminDashboard = () => {
     isLoading: inReviewLoading,
   } = useFetchAllRequestsQuery({ dateTo, dateFrom, status: "in_review" });
 
+  const {
+    data: ReviewedData,
+    error: ReviewedError,
+    isLoading: ReviewedLoading,
+  } = useFetchAllRequestsQuery({ dateTo, dateFrom, status: "reviewed" });
+
   // Combine loading and error states
   const isLoading =
     pendingLoading || completedLoading || rejectedLoading || inReviewLoading;
@@ -69,17 +76,21 @@ const AdminDashboard = () => {
     (pendingData?.data?.length || 0) +
     (completedData?.data?.length || 0) +
     (rejectedData?.data?.length || 0) +
-    (inReviewData?.data?.length || 0);
+    (inReviewData?.data?.length || 0) + 
+    (ReviewedData?.data?.length || 0);
   console.log("Pending Requests:", pendingData);
   console.log("Completed Requests:", completedData);
   console.log("Rejected Requests:", rejectedData);
   console.log("In Review Requests:", inReviewData);
+  console.log("reviews:eeeeeeeeeeeeeee", ReviewedData);
+  
 
   const totalRequests = [
     ...(pendingData?.data || []),
     ...(completedData?.data || []),
     ...(rejectedData?.data || []),
     ...(inReviewData?.data || []),
+    ...(ReviewedData?.data || []),
   ];
 
   const sortedRequests = totalRequests.some((item) => item?.logdatetime)
@@ -126,14 +137,14 @@ const AdminDashboard = () => {
               ? "bg-red-100 text-red-600 text-xs font-medium px-4 py-0.5 rounded-full border border-red-500"
               : text === "pending"
               ? "bg-orange-100 text-red-500 text-xs font-medium px-4 py-0.5 rounded-full border border-red-400"
-              : text === "Approved"
+              : text === "completed"
               ? "bg-green-100 text-green-800 text-xs font-medium px-4 py-0.5 rounded-full border border-green-500"
               : text === "IN REVIEW"
               ? "bg-blue-100 text-blue-600 text-xs font-medium px-4 py-0.5 rounded-full border border-blue-500"
               : "bg-blue-100 text-blue-600 text-xs font-medium px-4 py-0.5 rounded-full border border-blue-500"
           }
         >
-          {text}
+          {capitalizeText(text)}
         </label>
       ),
     },
