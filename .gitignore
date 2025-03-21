@@ -67,6 +67,8 @@ web_modules/
 # Output of 'npm pack'
 *.tgz
 
+echo "src/pages/auth/signin/client_secret_*.json" 
+
 # Yarn Integrity file
 .yarn-integrity
 
