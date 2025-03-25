@@ -50,29 +50,46 @@ const JobsPage = () => {
   }, [jobsData]);
 
   const handleApplyFilters = () => {
-    if (!filteredJobs.length) return;
+  if (!filteredJobs.length) return;
 
-    const filtered = filteredJobs.filter((job) => {
-      return (
-        (!filters.title ||
-          job.cleaned_job_title
-            .toLowerCase()
-            .includes(filters.title.toLowerCase())) &&
-        (!filters.location ||
-          job.city.toLowerCase().includes(filters.location.toLowerCase())) &&
-        (!filters.company ||
-          job.company.toLowerCase().includes(filters.company.toLowerCase()))
-      );
-    });
+  const filtered = filteredJobs.filter((job) => {
+    return (
+      (!filters.title ||
+        job.cleaned_job_title.toLowerCase().includes(filters.title.toLowerCase())) &&
+      (!filters.location ||
+        job.city.toLowerCase().includes(filters.location.toLowerCase())) &&
+      (!filters.company ||
+        job.company.toLowerCase().includes(filters.company.toLowerCase()))
+    );
+  });
 
-    setFilteredJobs(filtered);
-    setIsModalOpen(false); // Close modal after applying filters
-  };
+  setFilteredJobs(filtered);
+  
+  // Show message if no results after filtering
+  if (filtered.length === 0) {
+    message.info("No jobs match your filters. Try different criteria.");
+    setFilters({ title: "", location: "", company: "" });
+    setFilteredJobs(jobsData);
+    setIsModalOpen(false); // Keep modal open
+  }
+  
+  setIsModalOpen(false);
+};
 
   // 🔹 Reset Filters
   const handleResetFilters = () => {
     setFilters({ title: "", location: "", company: "" });
     setFilteredJobs(jobsData);
+    setIsModalOpen(false);
+  };
+
+  const handleModalClose = () => {
+    // Only reset filters if there are no results
+    if (filteredJobs.length === 0) {
+      setFilters({ title: "", location: "", company: "" });
+      setFilteredJobs(jobsData);
+    // setIsModalOpen(false);
+    }
     setIsModalOpen(false);
   };
 
@@ -231,10 +248,14 @@ const JobsPage = () => {
     }
   }, [filteredJobs, userInformation]); // Depend on userInformation to trigger after login
 
+  const getCurrentPageUrl = () => {
+    return `${window.location.pathname}${window.location.search}`;
+  };
+
   return (
-    <div>
+    <div className="">
       <Navbar />
-      <div className="flex gap-6 p-6 bg-gray-100 pt-24 px-24 min-h-screen">
+      <div className="flex gap-6 p-6 bg-gray-100 pt-24 px-24 min-h-screen dark:text-black">
         {/* 🔹 Sidebar */}
         <div className="w-1/3 bg-white shadow-md rounded-lg p-4 h-full sticky top-0">
           <h2 className="text-lg font-semibold mb-4">Job Listings</h2>
@@ -292,7 +313,7 @@ const JobsPage = () => {
         </div>
 
         {/* 🔹 Job Details */}
-        <div className="w-2/3 space-y-6 overflow-y-auto max-h-screen">
+        <div className="w-2/3 mr-2 space-y-6 overflow-y-auto max-h-screen custom-scrollbar pr-4">
           {isLoading ? (
             Array.from({ length: 3 }).map((_, index) => (
               <div key={index} className="bg-white shadow-lg rounded-lg p-6">
@@ -374,17 +395,19 @@ const JobsPage = () => {
             <Button
               className="bg-purple-800 text-white hover:!bg-purple-700"
               onClick={() => {
-                // Store the selected job in localStorage
                 localStorage.setItem(
                   "selectedJob",
                   JSON.stringify({
                     jobId: selectedJob?.unique_id,
                     title: selectedJob?.cleaned_job_title,
                     company: selectedJob?.company,
+                    // Store current page URL for redirect back
+                    redirectUrl: getCurrentPageUrl(),
                   })
                 );
-                // Navigate to login page with redirect URL as a query parameter
-                navigate(`/login?redirect=${window.location.pathname}`);
+                window.location.href = `/login?redirect=${encodeURIComponent(
+                  getCurrentPageUrl()
+                )}`;
               }}
             >
               Log In
@@ -392,17 +415,19 @@ const JobsPage = () => {
             <Button
               className="hover:!text-purple-700 hover:!border-purple-700"
               onClick={() => {
-                // Store the selected job in localStorage
                 localStorage.setItem(
                   "selectedJob",
                   JSON.stringify({
                     jobId: selectedJob?.unique_id,
                     title: selectedJob?.cleaned_job_title,
                     company: selectedJob?.company,
+                    // Store current page URL for redirect back
+                    redirectUrl: getCurrentPageUrl(),
                   })
                 );
-                // Navigate to signup page with redirect URL as a query parameter
-                navigate(`/signup?redirect=${window.location.pathname}`);
+                window.location.href = `/sign-up?redirect=${encodeURIComponent(
+                  getCurrentPageUrl()
+                )}`;
               }}
             >
               Sign Up
@@ -413,40 +438,58 @@ const JobsPage = () => {
         {/* 🔹 Filter Modal */}
         <Modal
           open={isModalOpen}
-          onCancel={() => setIsModalOpen(false)}
+          onCancel={handleModalClose}
           footer={null}
           closeIcon={<CloseOutlined />}
           title="Filters"
         >
-          <Input
-            placeholder="Job title"
-            value={filters.title}
-            onChange={(e) => setFilters({ ...filters, title: e.target.value })}
-          />
-          <Input
-            placeholder="Location"
-            value={filters.location}
-            onChange={(e) =>
-              setFilters({ ...filters, location: e.target.value })
-            }
-          />
-          <Input
-            placeholder="Company"
-            value={filters.company}
-            onChange={(e) =>
-              setFilters({ ...filters, company: e.target.value })
-            }
-          />
+          <div className="flex flex-col gap-4 mb-6">
+            <div>
+              <label>Job Title:</label>
+              <Input
+                placeholder="Job title"
+                value={filters.title}
+                onChange={(e) =>
+                  setFilters({ ...filters, title: e.target.value })
+                }
+              />
+            </div>
+            <div>
+              <label>location</label>
+              <Input
+                placeholder="Location"
+                value={filters.location}
+                onChange={(e) =>
+                  setFilters({ ...filters, location: e.target.value })
+                }
+              />
+            </div>
+            <div>
+              <label>Company</label>
+              <Input
+                placeholder="Company"
+                value={filters.company}
+                onChange={(e) =>
+                  setFilters({ ...filters, company: e.target.value })
+                }
+              />
+            </div>
+          </div>
 
           <Button
             type="primary"
             block
             onClick={handleApplyFilters}
-            className="mb-3"
+            className="mb-3 bg-purple-800 hover:!bg-purple-700"
           >
             Apply Filters
           </Button>
-          <Button type="link" block onClick={handleResetFilters}>
+          <Button
+            type="link"
+            block
+            onClick={handleResetFilters}
+            className="border-none hover:!border-none text-purple-600"
+          >
             Reset Filters
           </Button>
         </Modal>

@@ -4,18 +4,18 @@ import Footer from "../../components/Footer";
 
 const TermsOfUse = () => {
   return (
-    <>
+    <div className="custom-scrollbar">
     <Navbar />
       <div
         id="main-content"
-        className="h-full bg-white mb-5 relative"
+        className="h-full bg-white mb-5 relative overflow-auto dark:text-black"
         style={{ top: "65px" }}
       >
         {/* Hero Section */}
         <section className="bg-white lg:h-screen flex items-center hero_bg fading_edge p-8 py-24">
           <div className="mx-auto max-w-screen-xl">
             <div className="max-w-2xl mb-8 text-5xl font-bold tracking-tight leading-none text-center">
-              <p className="font-DMSerifDisplay tracking-wide">Terms of Use</p>
+              <p className="font-DMSerifDisplay-bold tracking-wide">Terms of Use</p>
             </div>
 
             <p className="font-normal text-gray-900 font-Archivo text-md flex justify-center">
@@ -713,7 +713,7 @@ const TermsOfUse = () => {
         </section>
         <Footer />
       </div>
-    </>
+    </div>
   );
 };
 

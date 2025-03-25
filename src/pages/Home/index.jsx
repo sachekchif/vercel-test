@@ -144,7 +144,7 @@ const Home = () => {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full dark:text-black">
       {/* Fixed Notification for Token Processing */}
       {isModalVisible && (
         <div

@@ -6,6 +6,7 @@ import CustomTooltip from "../CustomTooltip";
 import CustomInput from "../CustomRequestInput";
 import CustomButton from "../CustomButton";
 import { useResetPasswordMutation } from "../../services/apiSlice";
+import { CheckCircleFilled, CloseCircleFilled } from "@ant-design/icons";
 
 const ResetPasswordForm = () => {
   const [resetPassword, { isLoading }] = useResetPasswordMutation();
@@ -17,10 +18,37 @@ const ResetPasswordForm = () => {
     confirmPassword: "",
   });
   const [error, setError] = useState("");
+  const [isPasswordTouched, setIsPasswordTouched] = useState(false);
+  const [isConfirmPasswordTouched, setIsConfirmPasswordTouched] = useState(false);
+
+  const passwordRequirements = [
+    { regex: /[A-Z]/, text: "One uppercase letter (A, B, C...)" },
+    { regex: /[a-z]/, text: "One lowercase letter (a, b, c...)" },
+    { regex: /[0-9]/, text: "One number (1, 2, 3...)" },
+    { regex: /[\W_]/, text: "One special character (!, @, #...)" },
+    { regex: /.{8,}/, text: "Minimum 8 characters" },
+  ];
+
+  const isPasswordValid = (password) => {
+    return passwordRequirements.every((req) => req.regex.test(password));
+  };
 
   const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    if (error) setError(""); // Clear error when the user modifies input
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    if (name === "password") {
+      setIsPasswordTouched(true);
+    }
+
+    if (name === "confirmPassword") {
+      setIsConfirmPasswordTouched(true);
+      setError(value !== formData.password ? "Passwords do not match " : "");
+    }
   };
 
   const submitFormData = async (e) => {
@@ -40,10 +68,16 @@ const ResetPasswordForm = () => {
       return;
     }
 
+    // Validate password requirements
+    if (!isPasswordValid(formData.password)) {
+      toast.error("Password does not meet requirements.");
+      return;
+    }
+
     try {
       const response = await resetPassword({
         token: formData.token,
-        email: formData.email, // Corrected typo here
+        email: formData.email,
         newPassword: formData.password,
       }).unwrap();
 
@@ -78,7 +112,7 @@ const ResetPasswordForm = () => {
       />
       <Spacer size="24px" />
       <CustomInput
-        type="email" // Corrected input type
+        type="email"
         name="email"
         label="Email Address"
         onChange={handleInputChange}
@@ -86,22 +120,21 @@ const ResetPasswordForm = () => {
         placeholder="Enter email"
       />
       <Spacer size="24px" />
-      <CustomTooltip
+      {/* <CustomTooltip
         content={
           <div>
             <p>
               <strong>Password requirements:</strong>
             </p>
             <ul>
-              <li>One uppercase letter (A, B, C...)</li>
-              <li>One lowercase letter (a, b, c...)</li>
-              <li>One number (1, 2, 3...)</li>
-              <li>One special character (!, @, #...)</li>
-              <li>Minimum 8 characters</li>
+              {passwordRequirements.map(({ text }, index) => (
+                <li key={index}>{text}</li>
+              ))}
             </ul>
           </div>
         }
       >
+      </CustomTooltip> */}
         <CustomInput
           type="password"
           name="password"
@@ -110,7 +143,33 @@ const ResetPasswordForm = () => {
           value={formData.password}
           placeholder="Enter new password"
         />
-      </CustomTooltip>
+
+      {/* Password Validation Messages */}
+      {(isPasswordTouched && !isPasswordValid(formData.password)) ||
+      !isConfirmPasswordTouched ? (
+        <div className="text-sm text-gray-600 mt-1">
+          <ul>
+            {passwordRequirements.map(({ regex, text }, index) => (
+              <li
+                key={index}
+                className={
+                  regex.test(formData.password)
+                    ? "text-green-500"
+                    : "text-red-500"
+                }
+              >
+                {regex.test(formData.password) ? (
+                  <CheckCircleFilled twoToneColor="#52c41a" />
+                ) : (
+                  <CloseCircleFilled twoToneColor="#ff0000" />
+                )}{" "}
+                {text}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
       <Spacer size="24px" />
       <CustomInput
         type="password"
@@ -119,9 +178,10 @@ const ResetPasswordForm = () => {
         onChange={handleInputChange}
         value={formData.confirmPassword}
         placeholder="Confirm new password"
+        errorMessage={error}
       />
       <Spacer size="24px" />
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {/* {error && <p style={{ color: "red" }}>{error}</p>} */}
       <CustomButton loading={isLoading} disabled={isLoading} type="submit">
         Reset Password
       </CustomButton>

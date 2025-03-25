@@ -1,15 +1,16 @@
 import React from "react";
 import Navbar from "../../components/Navbar";
 import PricingSection from "../../components/Pricing/PricingSection";
+import Footer from "../../components/Footer";
 
 const Pricing = () => {
   return (
-    <div>
+    <div className="dark:text-black">
       <Navbar />
       <section className="bg-white pt-40 flex items-center hero_bg fading_edge p-8 py-24">
         <div className="mx-auto max-w-screen-xl">
           <div className="max-w-2xl mb-8 text-5xl font-bold tracking-tight leading-none text-center">
-            <p className="font-DMSerifDisplay tracking-wide">
+            <p className="font-DMSerifDisplay-bold tracking-wide">
               Choose your Payment plan
             </p>
           </div>
@@ -26,6 +27,7 @@ const Pricing = () => {
       </section>
 
       <PricingSection />
+      <Footer />
     </div>
   );
 };

@@ -5,9 +5,9 @@ import logoImage from "../assets/images/oa_logo_wide.png";
 import NewRequestModal from "./Requests/NewReqModal";
 import { DownOutlined, PlusOutlined, UserOutlined } from "@ant-design/icons";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Avatar, Button, Dropdown, Menu } from "antd";
+import { Avatar, Button, Dropdown, Menu, Modal } from "antd";
 import NewJobRequestModal from "./Requests/NewJobRequestModal";
-import { useLogout } from "../utils/constants";
+import { LogoutIcon, useLogout } from "../utils/constants";
 
 const navItems = [
   { title: "Home", href: "/" },
@@ -30,6 +30,7 @@ function Navbar() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [profile, setProfile] = useState(null);
   const [profilePic, setProfilePic] = useState(null);
+   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   useEffect(() => {
     const userInformation = JSON.parse(
@@ -62,10 +63,23 @@ function Navbar() {
     setModalOpen(!isModalOpen);
   };
 
+  const handleSignOut = () => {
+    setShowLogoutModal(true);
+  };
+
   const handleMenuClick = ({ key }) => {
     if (key === "signout") {
-      logout();
+      handleSignOut();
     }
+  };
+
+  const cancelLogout = () => {
+    setShowLogoutModal(false);
+  };
+
+  const confirmLogout = () => {
+    logout();
+    setShowLogoutModal(false);
   };
 
   const NewbtnClassName = `before:ease relative h-[20px] overflow-hidden ${
@@ -265,6 +279,37 @@ function Navbar() {
           </ul>
         </div>
       </div>
+      <Modal
+        open={showLogoutModal}
+        onCancel={cancelLogout}
+        footer={null}
+        centered
+        className="text-center"
+      >
+        <div className="p-6 flex flex-col justify-center">
+          <div className="flex justify-center mb-4">
+            <span className="me-1 w-10 h-10 p-2.5 bg-purple-100 rounded-full"><LogoutIcon /></span>
+          </div>
+          <h3 className="text-xl text-center font-semibold mb-2">Confirm Sign Out</h3>
+          <p className="text-gray-600 mb-6 text-center">
+            Are you sure you want to sign out of your account?
+          </p>
+          <div className="flex justify-center gap-4">
+            <button
+              onClick={cancelLogout}
+              className="px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={confirmLogout}
+              className="px-6 py-2 bg-purple-700 text-white rounded-md hover:bg-purple-600"
+            >
+              Sign Out
+            </button>
+          </div>
+        </div>
+      </Modal>
     </nav>
   );
 }

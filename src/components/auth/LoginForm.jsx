@@ -175,7 +175,7 @@ const LoginForm = () => {
           <Spacer size="16px" />
           <div className="flex items-center justify-end">
             <Link to={"/forgot-password"} className="text-primaryColor text-sm">
-              Forget Password?
+              Forgot Password?
             </Link>
           </div>
           <Spacer size="28px" />

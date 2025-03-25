@@ -58,7 +58,7 @@ const Profile = () => {
 
   return (
     <SharedComponent>
-      <div className="rounded-lg mt-14 mb-12">
+      <div className="rounded-lg mt-14 mb-12 dark:text-black">
         <ProfileHeader />
         <TabList tabs={tabs} activeTab={activeTab} onTabClick={setActiveTab} />
         <div className="bg-gray-50 w-full">

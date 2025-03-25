@@ -20,7 +20,7 @@ const JobApplicationSection = () => {
               key={index}
               className="group relative min-w-full h-full bg-gray-100 rounded-2xl p-4 transition-all duration-500 max-md:max-w-md max-md:mx-auto md:w-2/5 md:h-64 xl:p-4 xl:w-1/4 hover:bg-purple-700"
             >
-              <div className="bg-white rounded-full flex justify-center items-center mb-12 w-14 h-14">
+              <div className="bg-white rounded-full flex justify-center items-center mb-12 w-14 h-14 dark:text-black">
                 {card.icon}
               </div>
               <h4 className="text-xl font-semibold text-gray-900 mb-3 capitalize transition-all duration-500 group-hover:text-white">

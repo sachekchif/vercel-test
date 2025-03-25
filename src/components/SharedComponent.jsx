@@ -10,7 +10,7 @@ const SharedComponent = ({ children }) => {
       <Sidebar />
 
       <Navbar />
-      <div className="px-8 py-8 sm:ml-64 bg-gray-50 w-full h-screen">{children}</div>
+      <div className="px-8 py-8 sm:ml-64 bg-gray-50 w-full h-full">{children}</div>
     </div>
   );
 };

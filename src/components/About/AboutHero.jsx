@@ -42,13 +42,13 @@ const AboutHero = () => {
                     </span>
                   </div>
                   <div className="flex items-start mb-4">
-                    <h2 className="text-3xl font-bold max-w-7xl leading-snug">
+                    <h2 className="text-3xl font-bold max-w-7xl leading-snug dark:text-black">
                       Resumes That Shine, Applications That Stand Out
                     </h2>
                   </div>
                 </div>
                 <div className="flex flex-col">
-                  <p className="text-md font-normal max-w-5xl mb-8">
+                  <p className="text-md font-normal max-w-5xl mb-8 dark:text-black">
                     We are a team of passionate professionals dedicated to
                     helping you achieve your career goals. Our platform provides
                     the tools and resources you need to create professional job
@@ -338,7 +338,7 @@ const AboutHero = () => {
         <section className="bg-white">
             <div className="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6 ">
                 <div className="mx-auto max-w-screen-sm text-center mb-8 lg:mb-16">
-                    <h2 className="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white">Our Team</h2>
+                    <h2 className="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-black">Our Team</h2>
                     <p className="font-light lg:mb-16 max-w-xl text-md text-gray-500 ">
                         Meet the brilliant minds driving the vision of Outsource Apply — a team dedicated to
                         revolutionizing the job application process. With expertise, passion,

@@ -4,18 +4,18 @@ import Footer from "../../components/Footer";
 
 const PrivacyPolicy = () => {
   return (
-    <>
+    <div className="custom-scrollbar">
     <Navbar />
       <div
         id="main-content"
-        className="h-full bg-white mb-5 relative"
+        className="h-full bg-white mb-5 relative overflow-auto"
         style={{ top: "65px" }}
       >
         {/* Hero Section */}
-        <section className="bg-white lg:h-screen flex items-center hero_bg fading_edge p-8 py-24">
+        <section className="bg-white lg:h-screen flex items-center hero_bg fading_edge p-8 py-24 ">
         <div class="mx-auto max-w-screen-xl">
                 <div class="max-w-2xl mb-8 text-5xl font-bold tracking-tight leading-none text-center">
-                    <p class="font-DMSerifDisplay tracking-wide">
+                    <p class="font-DMSerifDisplay-bold tracking-wide dark:text-black">
                         Privacy Policy
                     </p>
                 </div>
@@ -29,7 +29,7 @@ const PrivacyPolicy = () => {
         </section>
 
         {/* Main Content Section */}
-        <section className="py-10 bg-white sm:py-16 lg:py-24">
+        <section className="py-10 bg-white sm:py-16 lg:py-24 dark:text-black">
             <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <div className="w-full tab-pane max-md:px-4">
                     
@@ -97,7 +97,7 @@ const PrivacyPolicy = () => {
         </section>
         <Footer />
       </div>
-    </>
+    </div>
   );
 };
 

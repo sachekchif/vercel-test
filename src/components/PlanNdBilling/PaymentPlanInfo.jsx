@@ -1,82 +1,110 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Tag } from "antd";
-import { toast } from "sonner"; // Import Sonner for toast notifications
+import { toast } from "sonner";
 import { useLazyCancelSubscriptionQuery } from "../../services/apiSlice";
-import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
+import { useNavigate } from "react-router-dom";
 
 const PaymentPlanInfo = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [price, setPrice] = useState(25); // Default price
+  const [subscriptionData, setSubscriptionData] = useState({
+    type: "free",
+    price: 0,
+    requestsLeft: 0
+  });
   const [triggerCancelSubscription, { data, error, isLoading }] = useLazyCancelSubscriptionQuery();
-  const navigate = useNavigate(); // Hook for navigation
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Fetch user information from session storage
     const userInfo = JSON.parse(sessionStorage.getItem("userInformation"));
+    const subscription = userInfo?.profile?.subscription || "free";
+    const requestsLeft = userInfo?.numberOfRequests || 0;
 
-    if (userInfo?.profile?.subscription === "free") {
-      setPrice(0); // Update price for free subscription
-    } else {
-      setPrice(25); // Update price for paid subscription
+    let price = 0;
+    if (subscription === "premium") {
+      price = 25;
+    } else if (subscription === "basic") {
+      price = 0;
     }
+
+    setSubscriptionData({
+      type: subscription,
+      price,
+      requestsLeft
+    });
   }, []);
 
   const showModal = () => setIsModalVisible(true);
 
   const handleOk = async () => {
     try {
-      await triggerCancelSubscription(); // Trigger the lazy query
+      await triggerCancelSubscription();
 
       if (data?.statusCode === "00") {
         toast.success("Subscription canceled successfully!");
+        // Update local session data
+        const userInfo = JSON.parse(sessionStorage.getItem("userInformation"));
+        sessionStorage.setItem(
+          "userInformation",
+          JSON.stringify({
+            ...userInfo,
+            profile: {
+              ...userInfo.profile,
+              subscription: "free"
+            }
+          })
+        );
         setIsModalVisible(false);
+        setSubscriptionData(prev => ({ ...prev, type: "free", price: 0 }));
       } else if (data?.statusCode === "96") {
-        toast.error(data?.statusMessage || "An error occurred while canceling the subscription.");
-      } else {
-        toast.error("Unexpected error occurred.");
+        toast.error(data?.statusMessage || "Error canceling subscription");
       }
     } catch (err) {
-      console.error("Error canceling subscription:", err);
-      toast.error("Failed to cancel the subscription. Please try again later.");
+      console.error("Error:", err);
+      toast.error("Failed to cancel subscription");
     }
   };
 
   const handleCancel = () => setIsModalVisible(false);
 
   const handleUpgrade = () => {
-    navigate("/checkout/premium"); // Navigate to the pricing or checkout page
+    navigate("/checkout/premium");
+  };
+
+  const getTagColor = () => {
+    switch(subscriptionData.type) {
+      case "premium": return "green";
+      case "basic": return "blue";
+      default: return "gray";
+    }
+  };
+
+  const getTagText = () => {
+    switch(subscriptionData.type) {
+      case "premium": return "Premium";
+      case "Basic": return `Basic (${subscriptionData.requestsLeft} requests done)`;
+      default: return "Free";
+    }
   };
 
   return (
     <div className="col-span-2 flex flex-col justify-between">
-      {/* Form for displaying the payment information */}
       <form className="w-full">
         <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-4 mb-8">
           <div className="flex items-center gap-2">
             <div className="flex">
               <label className="text-xl font-medium">&#163;</label>
-              <label className="text-5xl font-bold">{price}</label>
+              <label className="text-5xl font-bold">{subscriptionData.price}</label>
             </div>
             <div>
-              <Tag color={price === 0 ? "blue" : "green"}>
-                {price === 0 ? "Free" : "Premium"}
+              <Tag color={getTagColor()}>
+                {getTagText()}
               </Tag>
             </div>
           </div>
         </div>
 
-        {/* Conditionally render buttons based on subscription type */}
-        {price === 0 ? ( // If subscription is free, show Upgrade to Premium button
-          <div className="flex justify-start">
-            <Button
-              type="primary"
-              onClick={handleUpgrade}
-              className="bg-green-600 hover:!bg-green-500 font-medium rounded-lg text-sm px-16 py-2.5"
-            >
-              Upgrade to Premium
-            </Button>
-          </div>
-        ) : ( // If subscription is paid, show Cancel Subscription button
+        {subscriptionData.type === "premium" ? (
           <div className="flex justify-start">
             <Button
               type="primary"
@@ -86,10 +114,19 @@ const PaymentPlanInfo = () => {
               Cancel Subscription
             </Button>
           </div>
+        ) : (
+          <div className="flex justify-start">
+            <Button
+              type="primary"
+              onClick={handleUpgrade}
+              className="bg-purple-700 hover:!bg-purple-600 font-medium rounded-lg text-sm px-16 py-2.5"
+            >
+              {subscriptionData.type === "basic" ? "Upgrade to Premium" : "Get Premium"}
+            </Button>
+          </div>
         )}
       </form>
 
-      {/* Modal for cancel confirmation */}
       <Modal
         title="Cancel Subscription"
         open={isModalVisible}
@@ -115,7 +152,7 @@ const PaymentPlanInfo = () => {
           </svg>
 
           <h3 className="mb-5 text-lg font-normal text-gray-800">
-            Are you sure you want to cancel your subscription with Outsource Apply?
+            Are you sure you want to cancel your Premium subscription?
           </h3>
 
           <Button
@@ -123,7 +160,7 @@ const PaymentPlanInfo = () => {
             danger
             onClick={handleOk}
             className="me-3"
-            loading={isLoading} // Show loading indicator while processing
+            loading={isLoading}
           >
             Yes, I'm sure
           </Button>

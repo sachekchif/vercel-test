@@ -65,8 +65,7 @@ const refreshTokenApi = async () => {
     }
 
     if (result.statusCode === "99") {
-      console.warn("[WARN] Session expired. Redirecting to login...");
-      toast.error("Session expired. Please log in again.");
+      // console.warn("[WARN] Session expired. Redirecting to login...");      // toast.error("Session expired. Please log in again.");
       // clearSessionStorage();
       // setTimeout(() => {
       //   window.location.href = "/login";

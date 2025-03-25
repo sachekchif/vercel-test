@@ -27,6 +27,7 @@ import TermsOfUse from '../pages/Terms and conditions';
 import PrivacyPolicy from '../pages/Privacy';
 import Services from '../pages/Services';
 import AdminRequest from '../pages/AdminRequest';
+import NotFound from '../pages/NotFound';
 // import About from '../pages/About/About';
 // import Contact from '../pages/Contact/Contact';
 
@@ -58,6 +59,7 @@ const AppRouter = () => (
       <Route path="/checkout/:planType?" element={<Checkout />} />
       <Route path="/pending-requests" element={<PendingRequest />} />
       <Route path="/alljobs/:jobTitle" element={<SearchJobsPage />} />
+      <Route path="/*" element={<NotFound />} />
     </Routes>
   </Router>
 );

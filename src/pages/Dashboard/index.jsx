@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
 import DashboardCard from "../../components/dashboard/DashboardCard.jsx";
 import { itemRender, onShowSizeChange } from "../../components/Pagination.jsx";
-import { Table } from "antd";
+import { Modal, Table } from "antd";
 import { BulletList } from "react-content-loader";
 import {
   CompletedIcon,
@@ -13,9 +13,11 @@ import {
   TotalReqIcon,
 } from "../../utils/constants.jsx";
 import { useFetchAllRequestsQuery } from "../../services/apiSlice.jsx";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { UserOutlined } from "@ant-design/icons";
 
 const Dashboard = () => {
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(false);
 
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -27,6 +29,16 @@ const Dashboard = () => {
 
   const dateTo = getCurrentDate(); // Use the current date as the end date
   const dateFrom = "2025-01-01"; // Example start date
+  const [profileCompleteModal, setProfileCompleteModal] = useState(false);
+
+  // Check profile completion status on component mount
+  useEffect(() => {
+    const userInfo = JSON.parse(sessionStorage.getItem("userInformation"));
+    if (userInfo?.profile?.otherProfileDetails?.[0]?.currentCv === null || 
+        userInfo?.profile?.otherProfileDetails?.[0]?.currentCv === "") {
+      setProfileCompleteModal(true);
+    }
+  }, []);
 
   // Fetch data for each status using separate hooks
   const {
@@ -163,7 +175,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="flex">
+    <div className="flex dark:text-black">
       <Navbar />
       <Sidebar />
       <div className="px-8 py-8 sm:ml-64 bg-gray-50 w-full h-full">
@@ -244,6 +256,40 @@ const Dashboard = () => {
             </div>
           </div>
         </main>
+         {/* Profile Completion Modal */}
+         <Modal
+          open={profileCompleteModal}
+          onCancel={() => setProfileCompleteModal(false)}
+          footer={null}
+          centered
+          className="text-center"
+        >
+          <div className="p-6">
+            <div className="flex justify-center mb-4">
+              <div className="bg-purple-100 p-4 rounded-full">
+                <UserOutlined className="text-purple-600 text-3xl" />
+              </div>
+            </div>
+            <h3 className="text-xl font-semibold mb-2">Complete Your Profile</h3>
+            <p className="text-gray-600 mb-6">
+              Do you want to complete your profile to have a seamless flow on the platform?
+            </p>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => setProfileCompleteModal(false)}
+                className="px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+              >
+                Maybe Later
+              </button>
+              <button
+                onClick={() => navigate("/profile")}
+                className="px-6 py-2 bg-purple-700 text-white rounded-md hover:bg-purple-600"
+              >
+                Complete Profile
+              </button>
+            </div>
+          </div>
+        </Modal>
       </div>
     </div>
   );

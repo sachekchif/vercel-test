@@ -80,7 +80,7 @@ const CustomRequestInput = ({
           defaultValue={defaultValue}
           placeholder={placeholder}
           required={isRequired}
-          className={`${classnames} ${disabled ? "bg-gray-200" : "bg-white"} border p-2 pr-14 rounded w-full`}
+          className={`${classnames} ${disabled ? "bg-gray-200 text-gray-500" : "bg-white"} border p-2 pr-14 rounded w-full`}
         />
         {suffix && (
           <span className="absolute right-8 top-1/2 transform -translate-y-1/2 text-gray-500">

@@ -38,7 +38,7 @@ const PricingSection = () => {
   ];
 
   return (
-    <section className="bg-white dark:bg-gray-900">
+    <section className="bg-white">
       <div className="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
         <div className="lg:grid lg:grid-cols-2 mx-auto gap-6">
           {plans.map((plan, index) => (

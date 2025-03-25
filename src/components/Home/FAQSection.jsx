@@ -5,7 +5,7 @@ const FAQSection = () => {
         <section className="py-10 bg-gray-50 sm:py-16 lg:py-24">
             <div className="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl">
                 <div className="max-w-2xl mx-auto text-center">
-                    <h2 className="mb-4 text-2xl tracking-tight font-extrabold text-center">Frequently Asked Questions (FAQ)</h2>
+                    <h2 className="mb-4 text-2xl tracking-tight font-extrabold text-center dark:text-black">Frequently Asked Questions (FAQ)</h2>
                     <p className="max-w-xl mx-auto mt-4 text-base leading-relaxed text-gray-600 mb-12">
                         Outsource Apply is an e-learning platform where individuals, companies, and schools can access
                         high-quality educational courses designed to improve skills, knowledge, and career growth.

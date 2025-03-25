@@ -2,6 +2,48 @@
 @tailwind components;
 @tailwind utilities;
 
+
+/* Custom scrollbar styles with reliable hover effect */
+.custom-scrollbar {
+  scrollbar-width: thin; /* For Firefox */
+  scrollbar-color: #9a7dff #f1f1f1; /* For Firefox */
+  height: 100vh;
+  top: 65px;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 3px;
+  height: 3px; /* For horizontal scrollbars */
+  transition: all 0.3s ease;
+}
+
+.custom-scrollbar:hover::-webkit-scrollbar {
+  width: 8px;
+  height: 8px; /* For horizontal scrollbars */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #9a7dff;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #7b5fb8;
+}
+
+/* Table header styles */
+.ant-table-thead .ant-table-cell {
+  background-color: #e5e7eb !important;
+  border: 2px solid #e5e7eb;
+  
+}
+
 .ant-table-thead .ant-table-cell {
   background-color: #e5e7eb !important;
   border: 2px solid #e5e7eb;
@@ -10,6 +52,7 @@
 .border-primary {
   /* background-color: #e5e7eb !important; */
   border: 1px solid #e5e7eb !important;
+  border-radius: 10px;
 }
 .google-spin .ant-spin-dot-item {
   background-color: #db4437; /* Google Red */

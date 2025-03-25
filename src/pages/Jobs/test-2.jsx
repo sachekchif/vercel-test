@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Modal, Input, Button, Typography, Skeleton, message } from "antd";
 import { CloseOutlined, EnvironmentOutlined } from "@ant-design/icons";
 import Navbar from "../../components/Navbar";
@@ -8,10 +8,10 @@ import {
 } from "../../services/apiSlice";
 import { FcBriefcase } from "react-icons/fc";
 import NewJobReqModal from "../../components/Requests/NewJobRequestModal";
-import { Link, useParams } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import EmptyState from "../../assets/images/magnifier-with-path.svg";
 
-const JobsPage = () => {
+const SearchJobsPage = () => {
   const { jobTitle } = useParams();
   const jobRefs = useRef({});
   const sidebarRefs = useRef({});
@@ -23,9 +23,11 @@ const JobsPage = () => {
   const [selectedJob, setSelectedJob] = useState(null);
   const { data } = useFetchAllJobsQuery();
   const jobsData = data?.data || [];
-  const [loadingFilterJobs, setLoadingFilterJobs] = useState(true); // Add loading state
+  const [loadingFilterJobs, setLoadingFilterJobs] = useState(true);
   const [triggerFetchJobs, { data: filterJobs }] =
     useFetchFilteredJobsMutation();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [activeJobId, setActiveJobId] = useState(
     filterJobs?.[0]?.unique_id || ""
@@ -40,9 +42,10 @@ const JobsPage = () => {
 
   // 🔹 Filter logic
   const [filteredJobs, setFilteredJobs] = useState([]);
+
   useEffect(() => {
     if (jobTitle) {
-      triggerFetchJobs({ jobTitle }); // 🔹 Send { "jobTitle": "..." } as a POST body
+      triggerFetchJobs({ jobTitle });
     }
   }, [jobTitle, triggerFetchJobs]);
 
@@ -51,6 +54,98 @@ const JobsPage = () => {
       setFilteredJobs(filterJobs?.data);
     }
   }, [filterJobs]);
+
+  // Check for user information on mount
+  useEffect(() => {
+    const userData = sessionStorage.getItem("userInformation");
+    if (userData) {
+      setUserInformation(JSON.parse(userData));
+    }
+  }, []);
+
+  // Check for stored job and modal type after authentication
+  useEffect(() => {
+    const storedJob = localStorage.getItem("selectedJob");
+    const modalType = searchParams.get("modal");
+
+    if (storedJob && userInformation) {
+      const parsedJob = JSON.parse(storedJob);
+      const matchingJob = filteredJobs.find(
+        (job) => job.unique_id === parsedJob.jobId
+      );
+
+      if (matchingJob) {
+        setSelectedJob(matchingJob);
+
+        if (modalType === "applyForMe") {
+          setIsJobModalOpen(true);
+        } else if (modalType === "applyNow") {
+          window.open(matchingJob?.incoming_click_url, "_blank");
+        }
+
+        // Clean up
+        localStorage.removeItem("selectedJob");
+        cleanUpUrl();
+      }
+    }
+  }, [userInformation, filteredJobs, searchParams]);
+
+  // 🔹 Handle Apply Now
+  const handleApplyNow = (jobId) => {
+    const jobToApply = filteredJobs?.find((job) => job.unique_id === jobId);
+    if (!userInformation) {
+      setSelectedJob(jobToApply);
+      updateUrlForModal("applyNow", jobToApply);
+      setIsAuthModalOpen(true);
+      return;
+    }
+    window.open(jobToApply?.incoming_click_url, "_blank");
+  };
+
+  // 🔹 Handle Apply for Me
+  const handleApplyForMe = (jobId) => {
+    const jobToApply = filteredJobs?.find((job) => job.unique_id === jobId);
+    setSelectedJob(jobToApply);
+    if (!userInformation) {
+      updateUrlForModal("applyForMe", jobToApply);
+      setIsAuthModalOpen(true);
+      return;
+    }
+    setIsJobModalOpen(true);
+  };
+
+  // 🔹 Update URL for modal
+  const updateUrlForModal = (modalType, job) => {
+    const url = new URL(window.location);
+    url.searchParams.set("modal", modalType);
+    url.searchParams.set("jobId", job.unique_id);
+    url.searchParams.set("title", job.cleaned_job_title.replace(/ /g, "-"));
+    url.searchParams.set("company", job.company.replace(/ /g, "-"));
+    window.history.pushState({}, "", url.toString());
+  };
+
+  // 🔹 Clean up URL
+  const cleanUpUrl = () => {
+    const url = new URL(window.location);
+    url.searchParams.delete("modal");
+    url.searchParams.delete("jobId");
+    url.searchParams.delete("title");
+    url.searchParams.delete("company");
+    window.history.replaceState({}, "", url.toString());
+  };
+
+  // 🔹 Handle Auth Modal Close
+  const handleAuthModalClose = () => {
+    setIsAuthModalOpen(false);
+    cleanUpUrl();
+  };
+
+  // 🔹 Handle Job Modal Close
+  const handleJobModalClose = () => {
+    localStorage.removeItem("selectedJob");
+    setIsJobModalOpen(false);
+    cleanUpUrl();
+  };
 
   const handleApplyFilters = () => {
     if (!filteredJobs.length) return;
@@ -69,10 +164,8 @@ const JobsPage = () => {
     });
 
     setFilteredJobs(filtered);
-    setIsModalOpen(false); // Close modal after applying filters
+    setIsModalOpen(false);
   };
-
-  console.log("filtered jobs yyy: ", filteredJobs);
 
   // 🔹 Reset Filters
   const handleResetFilters = () => {
@@ -81,113 +174,32 @@ const JobsPage = () => {
     setIsModalOpen(false);
   };
 
-  // 🔹 Observer to track top visible job
-  useEffect(() => {
-    let observer;
-    if (jobRefs.current && Object.keys(jobRefs.current).length > 0) {
-      observer = new IntersectionObserver(
-        (entries) => {
-          for (let entry of entries) {
-            if (entry.isIntersecting) {
-              const jobId = entry.target.getAttribute("data-id");
-              if (jobId) setActiveJobId(jobId);
-              break;
-            }
-          }
-        },
-        { root: null, rootMargin: "-50px 0px -50px 0px", threshold: 0.3 }
-      );
-
-      Object.values(jobRefs.current)
-        .filter((job) => job instanceof Element) // Ensure only valid elements
-        .forEach((job) => observer.observe(job));
-    }
-
-    return () => observer?.disconnect();
-  }, [filteredJobs]);
-
-  // 🔹 Scroll sidebar faster
-  useEffect(() => {
-    const activeJobElement = sidebarRefs.current[activeJobId];
-    if (activeJobElement && sidebarContainerRef.current) {
-      sidebarContainerRef.current.scrollTo({
-        top: activeJobElement.offsetTop - sidebarContainerRef.current.offsetTop,
-        behavior: "instant", // First, set an instant scroll
-      });
-
-      requestAnimationFrame(() => {
-        sidebarContainerRef.current.scrollTo({
-          top:
-            activeJobElement.offsetTop - sidebarContainerRef.current.offsetTop,
-          behavior: "smooth", // Then apply a smooth transition
-        });
-      });
-    }
-  }, [activeJobId]);
-
-  // Scroll job details when clicking on sidebar items
-  const handleSidebarClick = useCallback((jobId) => {
-    setActiveJobId(jobId);
-
-    const jobElement = jobRefs.current[jobId];
-    if (jobElement) {
-      jobElement.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }, []);
-
-  useEffect(() => {
-    const userData = sessionStorage.getItem("userInformation");
-    if (userData) {
-      setUserInformation(JSON.parse(userData));
-    }
-  }, []);
-
-  // 🔹 Handle Apply
-  const handleApplyNow = (jobId) => {
-    if (!userInformation) {
-      setIsAuthModalOpen(true);
-      return;
-    }
-    const jobToApply = filteredJobs?.find((job) => job.unique_id === jobId);
-    window.open(jobToApply?.incoming_click_url, "_blank");
-  };
-
-  const handleApplyForMe = (jobId) => {
-    if (!userInformation) {
-      setIsAuthModalOpen(true);
-    } else {
-      const jobToApply = filteredJobs?.find((job) => job.unique_id === jobId);
-      setSelectedJob(jobToApply);
-      setIsJobModalOpen(true);
-    }
-  };
-
-  console.log("test", filterJobs);
-
   // 🔹 Handle API response status
   useEffect(() => {
-      if (!filterJobs) return; // Ensure data is available
-    
-      if (filterJobs.statusCode !== "00") {
-        console.log("❌ Picked error: ", filterJobs.statusCode);
-        
-        message.error(
-          filterJobs.statusMessage || "Failed to fetch jobs. Please try again later."
-        );
-    
-        setFilteredJobs([]); // Clear jobs on error
-        setLoadingFilterJobs(false);
-        return;
-      }
-    
-      if (filterJobs?.length) {
-        setFilteredJobs(filterJobs); // Update state only if jobsData is valid
-      }
+    if (!filterJobs) return;
+
+    if (filterJobs.statusCode !== "00") {
+      message.error(
+        filterJobs.statusMessage ||
+          "Failed to fetch jobs. Please try again later."
+      );
+      setFilteredJobs([]);
       setLoadingFilterJobs(false);
-    }, [filterJobs]);
+      return;
+    }
+
+    if (filterJobs?.length) {
+      setFilteredJobs(filterJobs);
+    }
+    setLoadingFilterJobs(false);
+  }, [filterJobs]);
+
+  const getCurrentPageUrl = () => {
+    return `${window.location.pathname}${window.location.search}`;
+  };
 
   return (
-    <div>
+    <div className="dark:text-black">
       <Navbar />
       <div className="flex gap-6 p-6 bg-gray-100 pt-24 px-24 min-h-screen">
         {/* 🔹 Sidebar */}
@@ -217,7 +229,7 @@ const JobsPage = () => {
                 <li
                   key={job.unique_id}
                   ref={(el) => (sidebarRefs.current[job.unique_id] = el)}
-                  onClick={() => handleSidebarClick(job.unique_id)}
+                  onClick={() => setActiveJobId(job.unique_id)}
                   className={`p-3 border-b cursor-pointer ${
                     activeJobId === job.unique_id ? "bg-gray-200" : ""
                   }`}
@@ -231,7 +243,6 @@ const JobsPage = () => {
                 </li>
               ))
             ) : (
-              // 🔹 Show Empty State when no jobs are found
               <li className="flex flex-col items-center justify-center p-5 text-black">
                 <img
                   src={EmptyState}
@@ -243,7 +254,7 @@ const JobsPage = () => {
                   <span>{jobTitle}</span>"
                 </p>
                 <p className="text-sm text-center text-gray-400">
-                  Don’t let that stop you. Try again, and narrow or broaden your
+                  Don't let that stop you. Try again, and narrow or broaden your
                   search this time.
                 </p>
               </li>
@@ -295,34 +306,69 @@ const JobsPage = () => {
               ))}
         </div>
 
-        <NewJobReqModal
-          isOpen={isJobModalOpen}
-          onClose={() => setIsJobModalOpen(false)}
-          profile={userInformation?.profile}
-          job={selectedJob} // Pass the selected job
-        />
-        {/* no user modal */}
+        {/* New Job Request Modal - Only shows when user is authenticated */}
+        {userInformation && (
+          <NewJobReqModal
+            isOpen={isJobModalOpen}
+            onClose={handleJobModalClose}
+            profile={userInformation?.profile}
+            job={selectedJob}
+          />
+        )}
+
+        {/* Auth Modal */}
         <Modal
           open={isAuthModalOpen}
-          onCancel={() => setIsAuthModalOpen(false)}
+          onCancel={handleAuthModalClose}
           footer={null}
-          title="Sign Up or Log In"
+          title={`Want to work as a ${selectedJob?.cleaned_job_title} at "${selectedJob?.company}"`}
         >
-          <p>You need to sign up or log in to apply for this job.</p>
+          <p>
+            You need to be a member of{" "}
+            <strong className="text-purple-700">Outsource Apply</strong> to
+            apply for jobs. Please sign up or log in to continue.
+          </p>
           <div className="flex justify-end gap-4 mt-4">
-            <Link to="/login">
             <Button
-              type="primary"
+              className="bg-purple-800 text-white hover:!bg-purple-700"
+              onClick={() => {
+                localStorage.setItem(
+                  "selectedJob",
+                  JSON.stringify({
+                    jobId: selectedJob?.unique_id,
+                    title: selectedJob?.cleaned_job_title,
+                    company: selectedJob?.company,
+                    // Store current page URL for redirect back
+                    redirectUrl: getCurrentPageUrl(),
+                  })
+                );
+                window.location.href = `/login?redirect=${encodeURIComponent(
+                  getCurrentPageUrl()
+                )}`;
+              }}
             >
               Log In
             </Button>
-            </Link>
-            <Link to="/sign-up">
             <Button
+              className="hover:!text-purple-700 hover:!border-purple-700"
+              onClick={() => {
+                localStorage.setItem(
+                  "selectedJob",
+                  JSON.stringify({
+                    jobId: selectedJob?.unique_id,
+                    title: selectedJob?.cleaned_job_title,
+                    company: selectedJob?.company,
+                    // Store current page URL for redirect back
+                    redirectUrl: getCurrentPageUrl(),
+                  })
+                );
+                window.location.href = `/sign-up?redirect=${encodeURIComponent(
+                  getCurrentPageUrl()
+                )}`;
+              }}
             >
               Sign Up
             </Button>
-            </Link>
           </div>
         </Modal>
 
@@ -375,7 +421,12 @@ const JobsPage = () => {
           >
             Apply Filters
           </Button>
-          <Button type="link" block onClick={handleResetFilters} className="border-none hover:!border-none text-purple-600">
+          <Button
+            type="link"
+            block
+            onClick={handleResetFilters}
+            className="border-none hover:!border-none text-purple-600"
+          >
             Reset Filters
           </Button>
         </Modal>
@@ -384,4 +435,4 @@ const JobsPage = () => {
   );
 };
 
-export default JobsPage;
+export default SearchJobsPage;

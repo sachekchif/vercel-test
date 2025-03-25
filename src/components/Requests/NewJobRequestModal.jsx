@@ -7,8 +7,9 @@ import { useCreateRequestMutation } from "../../services/apiSlice";
 import { Button, Input, message } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import FileUpload from "../FileUpload";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import CustomLoadingButton from "../CustomLoadingButton";
+
 const { TextArea } = Input;
 
 const modalStyles = {
@@ -33,6 +34,7 @@ Modal.setAppElement("#root");
 
 const NewJobRequestModal = ({ isOpen, onClose, profile, job }) => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -66,36 +68,54 @@ const NewJobRequestModal = ({ isOpen, onClose, profile, job }) => {
     needsFollowUpMail: false,
   };
 
+  // Update URL when modal opens
+  useEffect(() => {
+    if (isOpen && job) {
+      const newParams = new URLSearchParams();
+      newParams.set("modal", "applyForMe");
+      newParams.set("jobId", job.unique_id);
+      newParams.set("title", job.cleaned_job_title.replace(/ /g, "-"));
+      newParams.set("company", job.company.replace(/ /g, "-"));
+      setSearchParams(newParams);
+    }
+  }, [isOpen, job, setSearchParams]);
+
+  // Update the form initialization useEffect
   useEffect(() => {
     if (isOpen) {
-      // Fetch user information from session storage
       const userInfo = JSON.parse(sessionStorage.getItem("userInformation"));
       const storedJob = localStorage.getItem("selectedJob");
-      console.log("ff", userInfo);
+
+      const initialData = {
+        ...defaultFormData,
+        // Always prioritize job data from props first
+        ...(job
+          ? {
+              jobTitle: job.cleaned_job_title || "",
+              companyName: job.company || "",
+              jobUrl: job.incoming_click_url || "",
+            }
+          : {}),
+      };
 
       if (userInfo) {
-        setFormData((prev) => ({
-          ...prev,
-          firstName: userInfo.profile.firstName || "",
-          lastName: userInfo.profile.lastName || "",
-          email: userInfo.profile.email || "",
-          phone: userInfo.profile.phone || "",
-        }));
+        initialData.firstName = userInfo.profile.firstName || "";
+        initialData.lastName = userInfo.profile.lastName || "";
+        initialData.email = userInfo.profile.email || "";
+        initialData.phone = userInfo.profile.phone || "";
       }
 
-      if (storedJob) {
+      if (storedJob && !job) {
         const parsedJob = JSON.parse(storedJob);
-        setFormData((prev) => ({
-          ...prev,
-          jobTitle: parsedJob.title || "",
-          companyName: parsedJob.company || "",
-        }));
-      } else if (job) {
-        setFormData(defaultFormData);
+        initialData.jobTitle = parsedJob.title || "";
+        initialData.companyName = parsedJob.company || "";
       }
+
+      setFormData(initialData);
     }
   }, [isOpen, job, profile]);
 
+  // Reset form when modal closes
   useEffect(() => {
     if (!isOpen) {
       setFormData(defaultFormData);
@@ -112,20 +132,91 @@ const NewJobRequestModal = ({ isOpen, onClose, profile, job }) => {
     setFormData((prev) => ({ ...prev, [name]: checked }));
   };
 
+  const handleClose = () => {
+    const newParams = new URLSearchParams(searchParams);
+    newParams.delete("modal");
+    newParams.delete("jobId");
+    newParams.delete("title");
+    newParams.delete("company");
+    setSearchParams(newParams);
+    onClose();
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Check if user is on Basic plan and has exceeded request limit
+    const userInfo = JSON.parse(sessionStorage.getItem("userInformation"));
+    if (
+      userInfo?.profile?.subscription === "Basic" &&
+      userInfo?.numberOfRequests >= 3
+    ) {
+      toast.error(
+        "You've exceeded your request limit as a Basic user. Upgrading to Premium..."
+      );
+
+      // Store the current URL and job details
+      const redirectState = {
+        pathname: window.location.pathname,
+        search: window.location.search,
+        jobDetails: {
+          jobId: job?.unique_id,
+          title: job?.cleaned_job_title,
+          company: job?.company,
+          jobUrl: formData.jobUrl,
+        },
+      };
+
+      localStorage.setItem(
+        "subscriptionRedirect",
+        JSON.stringify(redirectState)
+      );
+      localStorage.setItem(
+        "selectedJob",
+        JSON.stringify({
+          jobId: job?.unique_id,
+          title: job?.cleaned_job_title,
+          company: job?.company,
+        })
+      );
+
+      navigate("/checkout/premium");
+      return;
+    }
+
     // Check subscription
     if (profile?.subscription === "free") {
-      console.log("subs", profile.subscription);
       toast.error(
         "You have not subscribed to Outsource Apply yet. Redirecting you to subscribe..."
       );
-      setTimeout(() => {
-        // window.open("/checkout", "_blank");
-        navigate("/checkout"); // Redirect to checkout
-      }, 2000); // Allow time for the toast to show
-      return; // Exit the function
+
+      // Store the current URL and job details
+      const redirectState = {
+        pathname: window.location.pathname,
+        search: window.location.search,
+        jobDetails: {
+          jobId: job?.unique_id,
+          title: job?.cleaned_job_title,
+          company: job?.company,
+          jobUrl: formData.jobUrl,
+        },
+      };
+
+      localStorage.setItem(
+        "subscriptionRedirect",
+        JSON.stringify(redirectState)
+      );
+      localStorage.setItem(
+        "selectedJob",
+        JSON.stringify({
+          jobId: job?.unique_id,
+          title: job?.cleaned_job_title,
+          company: job?.company,
+        })
+      );
+
+      navigate("/checkout");
+      return;
     }
 
     const payload = {
@@ -143,11 +234,11 @@ const NewJobRequestModal = ({ isOpen, onClose, profile, job }) => {
       const response = await createRequest(payload).unwrap();
       if (response?.statusCode === "00") {
         message.success("Request has been created successfully");
-        localStorage.removeItem("selectedJob"); // Clear localStorage after success
+        localStorage.removeItem("selectedJob");
         setTimeout(() => {
           navigate("/all-requests");
         }, 1000);
-        onClose();
+        handleClose();
       } else if (response?.statusCode === "96") {
         const message =
           response?.data || response.statusMessage || "Unknown error.";
@@ -159,8 +250,8 @@ const NewJobRequestModal = ({ isOpen, onClose, profile, job }) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onRequestClose={onClose} style={modalStyles}>
-      <div className="bg-white rounded-lg shadow max-h-full flex flex-col">
+    <Modal isOpen={isOpen} onRequestClose={handleClose} style={modalStyles}>
+      <div className="bg-white rounded-lg shadow max-h-full flex flex-col dark:text-black">
         <div
           className="flex items-center justify-between p-4 md:p-5 border-b rounded-t"
           style={{
@@ -173,7 +264,7 @@ const NewJobRequestModal = ({ isOpen, onClose, profile, job }) => {
         >
           <h3 className="text-xl font-medium text-gray-900">
             New Job Request{" "}
-            {formData.jobTitle ? (
+            {job?.cleaned_job_title ? (
               <>
                 For{" "}
                 <span className="text-purple-600">{formData?.jobTitle}</span> in{" "}
@@ -185,7 +276,7 @@ const NewJobRequestModal = ({ isOpen, onClose, profile, job }) => {
           </h3>
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
           >
             <svg
@@ -250,7 +341,7 @@ const NewJobRequestModal = ({ isOpen, onClose, profile, job }) => {
               value={formData.jobTitle}
               placeholder="Enter a Job Title for this role. E.g. UI/UX Designer"
               onChange={handleInputChange}
-              disabled={!!formData.jobTitle}
+              disabled={job?.cleaned_job_title}
             />
             <Spacer size="24px" />
             <CustomInput
@@ -259,7 +350,7 @@ const NewJobRequestModal = ({ isOpen, onClose, profile, job }) => {
               value={formData.companyName}
               placeholder="Enter the your employer's company name"
               onChange={handleInputChange}
-              disabled={!!formData.companyName}
+              disabled={job?.company}
             />
             <Spacer size="24px" />
             <CustomInput

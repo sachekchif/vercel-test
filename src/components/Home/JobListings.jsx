@@ -131,7 +131,7 @@ const JobListing = () => {
     setIsJobModalOpen(true);
   };
 
-  const handleAuthModalClose = () => {
+  const handleAuthModalClose = () => { 
     setIsAuthModalOpen(false);
     cleanUpUrl();
   };

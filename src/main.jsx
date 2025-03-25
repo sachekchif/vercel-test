@@ -1,9 +1,9 @@
-// // Override console methods in production
-// if (process.env.NODE_ENV === "production") {
-//   console.log = () => {}; // Disable logs
-//   console.warn = () => {}; // Disable warnings
-//   // console.error is left intact for critical errors
-// }
+// Override console methods in production
+if (process.env.NODE_ENV === "production") {
+  console.log = () => {}; // Disable logs
+  console.warn = () => {}; // Disable warnings
+  // console.error is left intact for critical errors
+}
 import '@fontsource/dm-serif-display'; // Default weight (400)
 import '@fontsource/archivo'; // Default weight (400)
 import '@fontsource/archivo/400.css'; // Specific weight (400)

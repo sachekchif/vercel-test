@@ -1,5 +1,5 @@
-import React from "react";
-import { useLocation } from "react-router-dom"; // Import useLocation hook from react-router-dom
+import React, { useState } from "react";
+import { useLocation } from "react-router-dom";
 import {
   ActivitiesIcon,
   AdminDashboardIcon,
@@ -11,21 +11,15 @@ import {
   ProfileIcon,
   useLogout,
 } from "../utils/constants";
-import { Link } from "react-router-dom"; // Import Link from react-router-dom
+import { Link } from "react-router-dom";
+import { Modal } from "antd";
+import { LogoutOutlined, UserOutlined } from "@ant-design/icons";
 
-const SidebarLink = ({ label, href, icon, isActive }) => {
-  const logout = useLogout();
-  const handleClick = () => {
-    if (label === "Sign Out") {
-      // Clear session storage when clicking "Sign Out"
-      logout();
-    }
-  };
-
+const SidebarLink = ({ label, href, icon, isActive, onClick }) => {
   return (
     <Link
       to={href}
-      onClick={handleClick} // Attach event handler
+      onClick={onClick}
       className={`flex items-center p-2 rounded-lg transition-colors group ${
         isActive
           ? "bg-purple-700 text-white hover:text-white hover:bg-purple-800"
@@ -39,14 +33,14 @@ const SidebarLink = ({ label, href, icon, isActive }) => {
 };
 
 const Sidebar = () => {
-  const location = useLocation(); // Get the current location object
+  const location = useLocation();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const logout = useLogout();
 
-  // Retrieve user information from session storage
   const userInformation =
     JSON.parse(sessionStorage.getItem("userInformation")) || {};
-  const role = userInformation?.profile?.role || "user"; // Default role is 'user'
+  const role = userInformation?.profile?.role || "user";
 
-  // Define menu sections for different roles
   const menuSectionsByRole = {
     user: [
       {
@@ -96,7 +90,7 @@ const Sidebar = () => {
             label: "Pending On You",
             href: "/pending-requests",
             icon: <AllRequestsIcon />,
-          }, // New menu item
+          },
           { label: "All Users", href: "/all-users", icon: <AllUsersIcon /> },
           { label: "All Staff", href: "/all-staff", icon: <AllStaffIcon /> },
         ],
@@ -132,7 +126,7 @@ const Sidebar = () => {
             label: "Pending On You",
             href: "/pending-requests",
             icon: <AllRequestsIcon />,
-          }, // New menu item
+          },
           { label: "All Users", href: "/all-users", icon: <AllUsersIcon /> },
           { label: "All Staff", href: "/all-staff", icon: <AllStaffIcon /> },
         ],
@@ -164,11 +158,6 @@ const Sidebar = () => {
             href: "/ad-all-requests",
             icon: <AllRequestsIcon />,
           },
-          // {
-          //   label: "Pending On You",
-          //   href: "/pending-requests",
-          //   icon: <AllRequestsIcon />,
-          // }, // New menu item
           { label: "All Users", href: "/all-users", icon: <AllUsersIcon /> },
           { label: "All Staff", href: "/all-staff", icon: <AllStaffIcon /> },
         ],
@@ -186,35 +175,86 @@ const Sidebar = () => {
   // Get the menu sections for the current role
   const menuSections = menuSectionsByRole[role] || menuSectionsByRole.user;
 
+  const handleSignOut = () => {
+    setShowLogoutModal(true);
+  };
+
+  const confirmLogout = () => {
+    logout();
+    setShowLogoutModal(false);
+  };
+
+  const cancelLogout = () => {
+    setShowLogoutModal(false);
+  };
+
   return (
-    <aside
-      className="fixed top-0 left-0 z-40 w-64 h-screen pt-20 bg-white border-r border-gray-200"
-      aria-label="Sidebar"
-    >
-      <div className="h-full px-3 pb-4 overflow-y-auto">
-        {menuSections.map((section, index) => (
-          <div key={index} className="border-b border-t py-4">
-            <div className="mb-4">
-              <label className="text-sm font-semibold text-blue-500">
-                {section.title}
-              </label>
+    <>
+      <aside
+        className="fixed top-0 left-0 z-40 w-64 h-screen pt-20 bg-white border-r border-gray-200"
+        aria-label="Sidebar"
+      >
+        <div className="h-full px-3 pb-4 overflow-y-auto">
+          {menuSections.map((section, index) => (
+            <div key={index} className="border-b border-t py-4">
+              <div className="mb-4">
+                <label className="text-sm font-semibold text-blue-500">
+                  {section.title}
+                </label>
+              </div>
+              <ul className="space-y-2">
+                {section.items.map((item, idx) => (
+                  <li key={idx}>
+                    <SidebarLink
+                      label={item.label}
+                      href={item.label === "Sign Out" ? "#" : item.href}
+                      icon={item.icon}
+                      isActive={location.pathname === item.href}
+                      onClick={
+                        item.label === "Sign Out" ? handleSignOut : undefined
+                      }
+                    />
+                  </li>
+                ))}
+              </ul>
             </div>
-            <ul className="space-y-2">
-              {section.items.map((item, idx) => (
-                <li key={idx}>
-                  <SidebarLink
-                    label={item.label}
-                    href={item.href}
-                    icon={item.icon}
-                    isActive={location.pathname === item.href}
-                  />
-                </li>
-              ))}
-            </ul>
+          ))}
+        </div>
+      </aside>
+
+      {/* Logout Confirmation Modal */}
+      <Modal
+        open={showLogoutModal}
+        onCancel={cancelLogout}
+        footer={null}
+        centered
+        className="text-center"
+      >
+        <div className="p-6 flex flex-col justify-center">
+          <div className="flex justify-center mb-4">
+            <span className="me-1 w-10 h-10 p-2.5 bg-purple-100 rounded-full"><LogoutIcon /></span>
           </div>
-        ))}
-      </div>
-    </aside>
+          <h3 className="text-xl text-center font-semibold mb-2">Confirm Sign Out</h3>
+          <p className="text-gray-600 mb-6 text-center">
+            Are you sure you want to sign out of your account?
+          </p>
+          <div className="flex justify-center gap-4">
+            <button
+              onClick={cancelLogout}
+              className="px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={confirmLogout}
+              className="px-6 py-2 bg-purple-700 text-white rounded-md hover:bg-purple-600"
+            >
+              Sign Out
+            </button>
+          </div>
+        </div>
+      </Modal>
+    </>
   );
 };
 

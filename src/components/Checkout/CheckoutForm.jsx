@@ -1,76 +1,138 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useStripe, useElements, CardElement } from "@stripe/react-stripe-js";
 import {
   useFetchPlansQuery,
   useSubscribeMutation,
 } from "../../services/apiSlice";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const CheckoutForm = () => {
   const stripe = useStripe();
   const elements = useElements();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
-  const [successMessage, setSuccessMessage] = useState(null);
+  const [redirectData, setRedirectData] = useState(null);
 
-  // Fetch plans and subscription mutation moved to the top level
+  // Fetch plans and subscription mutation
   const { data: plansData, error: plansError, isLoading: isPlansLoading } =
     useFetchPlansQuery();
-  const [subscribe, { isLoading: isSubscribing, error: subscribeError }] =
-    useSubscribeMutation();
+  const [subscribe, { isLoading: isSubscribing }] = useSubscribeMutation();
+
+  // Check for redirect data on mount
+  useEffect(() => {
+    const storedRedirect = localStorage.getItem('subscriptionRedirect');
+    if (storedRedirect) {
+      setRedirectData(JSON.parse(storedRedirect));
+    }
+  }, []);
+
+  const fetchProfile = async (accessToken) => {
+    try {
+      const response = await fetch(
+        "https://backend-46kr.onrender.com/auth/profile",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+      throw error;
+    }
+  };
+
+  const updateUserSession = async () => {
+    const userInfo = JSON.parse(sessionStorage.getItem("userInformation"));
+    if (!userInfo) {
+      throw new Error("No user session found");
+    }
+
+    const profileResponse = await fetchProfile(userInfo.access_token);
+    if (!profileResponse) {
+      throw new Error("Failed to fetch profile");
+    }
+
+    // Update session storage with new profile data
+    sessionStorage.setItem(
+      "userInformation",
+      JSON.stringify({
+        ...userInfo,
+        profile: profileResponse.profile,
+      })
+    );
+
+    toast.success("Profile updated successfully");
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (!stripe || !elements) {
-      return; // Stripe.js hasn't loaded yet
+      return;
     }
 
     setLoading(true);
-
-    // Create PaymentMethod
-    const cardElement = elements.getElement(CardElement);
-    const { error, paymentMethod } = await stripe.createPaymentMethod({
-      type: "card",
-      card: cardElement,
-    });
-
-    if (error) {
-      setErrorMessage(error.message || "An error occurred");
-      setLoading(false);
-      return;
-    }
-
-    console.log("PAYMENT METHOD", paymentMethod);
-
-    // Select a basic plan
-    const basicPlan = plansData?.data?.[0]; // Adjust based on your API response structure
-    if (!basicPlan) {
-      console.error("Basic plan not found");
-      setErrorMessage("Unable to find a suitable plan.");
-      setLoading(false);
-      return;
-    }
+    setErrorMessage(null);
 
     try {
-      // Prepare subscription data
+      const cardElement = elements.getElement(CardElement);
+      const { error, paymentMethod } = await stripe.createPaymentMethod({
+        type: "card",
+        card: cardElement,
+      });
+
+      if (error) {
+        throw new Error(error.message || "Payment method creation failed");
+      }
+
+      const basicPlan = plansData?.data?.[0];
+      if (!basicPlan) {
+        throw new Error("Unable to find a suitable plan.");
+      }
+
       const subscriptionData = {
-        cancelUrl: "http://cancel.com",
-        successUrl: "http://success.comm", // Replace with actual success URL
-        planNumber: basicPlan.planId, // Use the correct plan ID
-        paymentMethodId: paymentMethod.id, // Replace with actual payment method ID
+        cancelUrl: window.location.href,
+        successUrl: window.location.href,
+        planNumber: basicPlan.planId,
+        paymentMethodId: paymentMethod.id,
       };
 
-      // Call the subscription mutation
       const response = await subscribe(subscriptionData).unwrap();
       console.log("Subscription successful:", response);
 
-      setSuccessMessage("Subscription successfully created!");
-    } catch (err) {
-      console.error("Subscription failed:", err);
-      setErrorMessage("Failed to process the subscription.");
-    }
+      // Update user profile while keeping payment button in loading state
+      await updateUserSession();
 
-    setLoading(false);
+      toast.success("Subscription successfully created!");
+
+      // Handle redirect
+      if (redirectData) {
+        const url = new URL(window.location.origin + redirectData.pathname);
+        url.search = new URLSearchParams({
+          modal: 'applyForMe',
+          jobId: redirectData.jobDetails.jobId,
+          title: redirectData.jobDetails.title.replace(/ /g, '-'),
+          company: redirectData.jobDetails.company.replace(/ /g, '-')
+        }).toString();
+
+        localStorage.removeItem('subscriptionRedirect');
+        localStorage.removeItem('selectedJob');
+        window.location.href = url.toString();
+      } else {
+        navigate('/dashboard');
+      }
+    } catch (err) {
+      console.error("Error:", err);
+      setErrorMessage(err.data?.message || err.message || "Payment failed");
+      toast.error(err.data?.message || err.message || "Payment failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -97,7 +159,7 @@ const CheckoutForm = () => {
           type="submit"
           disabled={!stripe || loading || isPlansLoading || isSubscribing}
           className={`py-2 px-4 w-full text-white font-medium rounded-md ${
-            loading
+            loading || isSubscribing
               ? "bg-gray-500 cursor-not-allowed"
               : "bg-purple-700 hover:bg-indigo-500"
           }`}
@@ -106,9 +168,6 @@ const CheckoutForm = () => {
         </button>
         {errorMessage && (
           <p className="text-red-500 text-center text-sm">{errorMessage}</p>
-        )}
-        {successMessage && (
-          <p className="text-green-500 text-center text-sm">{successMessage}</p>
         )}
         {plansError && (
           <p className="text-red-500 text-center text-sm">
