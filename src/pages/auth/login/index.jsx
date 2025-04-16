@@ -4,11 +4,61 @@ import { Link } from "react-router-dom"; // Using React Router for routing
 import LoginForm from "../../../components/auth/LoginForm";
 import Spacer from "../../../utils/Spacer";
 import TestimonialCarousel from "../../../components/auth/Testimonial";
+import { Helmet } from "react-helmet-async";
 // Removed next/image, as it's not needed in regular React
 
 const Login = () => {
   return (
     <main className="flex min-h-screen bg-white text-black w-full">
+      <Helmet>
+        <title>Login | OutsourceApply – Get Hired, With Ease</title>
+        <meta
+          name="description"
+          content="Log in to OutsourceApply and unlock thousands of remote jobs. Apply in seconds, get hired faster—effortlessly."
+        />
+        <meta
+          name="keywords"
+          content="  
+remote jobs login, work from home login, find remote jobs fast, easy remote job apply,  
+quick remote job hiring, remote job portal login, secure job search login,  
+remote work sign in, apply for remote jobs, instant remote job access,  
+remote career dashboard, get hired remotely, hassle-free job search,  
+remote job matches, one-click job applications, best remote job platform,  
+high-paying remote jobs, remote job alerts, remote work opportunities,  
+remote job board login, work from anywhere jobs, remote job tracker"
+        />
+        <meta
+          property="og:title"
+          content="Get Hired, With Ease | OutsourceApply Login"
+        />
+        <meta
+          property="og:description"
+          content="Skip the hassle—log in, apply in minutes, and land your dream remote job faster. Your next opportunity starts here."
+        />
+        <meta property="og:type" content="website" />
+        <meta
+          property="og:url"
+          content="https://www.outsourceapply.com/login"
+        />
+        <meta
+          property="og:image"
+          content="https://www.outsourceapply.com/assets/og-get-hired-ease.jpg"
+        />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content="Get Hired, With Ease | OutsourceApply"
+        />
+        <meta
+          name="twitter:description"
+          content="Log in and let remote jobs find YOU. Quick applications, instant matches—no stress, just results."
+        />
+        <meta
+          name="twitter:image"
+          content="https://www.outsourceapply.com/assets/twitter-get-hired-ease.jpg"
+        />
+      </Helmet>
+
       <div className="hidden lg:block lg:fixed inset-y-0 left-0 w-3/5">
         <TestimonialCarousel />
       </div>

@@ -1,9 +1,15 @@
-import React from "react";
-import TableRow from "./TableRow";
+import React, { useState, useEffect } from "react";
+import PermissionsTable from "./PermissionsTable";
 
-const StaffRoles = ({ permissions = {}, role, onPermissionChange, onSaveChanges }) => {
-  console.log("permissions: ", permissions);
-  
+const StaffRoles = ({ 
+  permissions = {}, 
+  role, 
+  onPermissionChange, 
+  onSaveChanges,
+  loading
+}) => {
+  const [localPermissions, setLocalPermissions] = useState({...permissions});
+
   const features = [
     {
       feature: "Transaction Page",
@@ -47,46 +53,33 @@ const StaffRoles = ({ permissions = {}, role, onPermissionChange, onSaveChanges 
     },
   ];
 
-  return (
-    <div className="col-span-2 flex flex-col justify-between">
-      <form className="w-full">
-        <div className="grid sm:grid-cols-1 lg:grid-cols-1 gap-4 mb-8">
-          <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-            <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-              <thead className="text-sm text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                <tr>
-                  <th scope="col" className="px-6 py-3">Page / Feature</th>
-                  <th scope="col" className="px-6 py-3">Description</th>
-                  <th scope="col" className="px-6 py-3">Turn On / Off</th>
-                </tr>
-              </thead>
-              <tbody>
-                {features.map((item) => (
-                  <TableRow
-                    key={item.permissionKey}
-                    feature={item.feature}
-                    description={item.description}
-                    isChecked={permissions?.[item.permissionKey] ?? false} // Ensure boolean value
-                    onChange={() => onPermissionChange(item.permissionKey, !permissions[item.permissionKey])} // Handle toggle
-                  />
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+  // Sync local permissions when props change
+  useEffect(() => {
+    setLocalPermissions({...permissions});
+  }, [permissions]);
 
-        <div className="flex justify-start">
-          <button
-            type="button"
-            className="text-white bg-purple-700 hover:bg-purple-600 font-medium rounded-lg text-sm px-16 py-2.5 text-center inline-flex items-center me-2 mb-2"
-            onClick={() => onSaveChanges(permissions)}
-          >
-            Save changes
-          </button>
-        </div>
-      </form>
-    </div>
+  const handlePermissionToggle = (permissionKey) => {
+    const newPermissions = {
+      ...localPermissions,
+      [permissionKey]: !localPermissions[permissionKey]
+    };
+    setLocalPermissions(newPermissions);
+    onPermissionChange?.(permissionKey, newPermissions[permissionKey]);
+  };
+
+  const handleSave = () => {
+    onSaveChanges?.(localPermissions);
+  };
+
+  return (
+    <PermissionsTable
+      features={features}
+      localPermissions={localPermissions}
+      handlePermissionToggle={handlePermissionToggle}
+      loading={loading}
+      handleSave={handleSave}
+    />
   );
 };
 
-export default StaffRoles;
+export default React.memo(StaffRoles);

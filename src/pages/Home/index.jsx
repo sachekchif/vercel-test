@@ -24,6 +24,10 @@ const Home = () => {
   const [apiResponse, setApiResponse] = useState(null);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    localStorage.removeItem('signupFormData');
+  }, []);
+
   // Check for token and refresh_token in the URL when the component mounts
   useEffect(() => {
     // Check if userInformation already exists in sessionStorage

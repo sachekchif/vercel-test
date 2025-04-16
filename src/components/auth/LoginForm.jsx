@@ -77,6 +77,7 @@ const LoginForm = () => {
 
       if (response.statusCode === "00") {
         message.success("Welcome!, login successful.");
+        localStorage.removeItem('signupFormData');
         sessionStorage.setItem("isScheduled", "true");
         scheduleTokenRefresh();
         sessionStorage.setItem("access_token", response.access_token);

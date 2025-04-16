@@ -18,8 +18,6 @@ import {
 import { BulletList } from "react-content-loader";
 import { itemRender, onShowSizeChange } from "../../components/Pagination.jsx";
 import {
-  canBlockUser,
-  canRestoreUser,
   CompletedIcon,
   DeleteIcon,
   getCurrentDate,
@@ -44,11 +42,13 @@ import {
   StopOutlined,
 } from "@ant-design/icons";
 import UserDetailDrawer from "../../components/Requests/UserDetailsDrawer.jsx";
+import { usePermissions } from "../../utils/permissions.jsx";
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
 const AllUsers = () => {
+  const { canDeleteUser, canBlockUser } = usePermissions();
   const [dateRange, setDateRange] = useState([]);
   const [status, setStatus] = useState("All");
   const [startDate, setStartDate] = useState("");
@@ -171,7 +171,7 @@ const AllUsers = () => {
     (user) => user.status === "active"
   ).length;
   const pendingUserCount = filteredUsers.filter(
-    (user) => user.status === "pending"
+    (user) => user.status === "suspending"
   ).length;
 
   const showDrawer = (id) => {
@@ -257,7 +257,7 @@ const AllUsers = () => {
       label: "Total Users",
       description: "All users on Outsource Apply",
       value: usersData?.data?.length || 0,
-      link: "all-requests",
+      // link: "all-requests",
       color: "",
       icon: <TotalCardIcon />,
       loading: usersLoading,
@@ -266,16 +266,16 @@ const AllUsers = () => {
       label: "Active Users",
       description: "Active users on Outsource Apply",
       value: activeUsersCount,
-      link: "all-users.html",
+      // link: "all-users.html",
       color: "text-green-500",
       icon: <PendingIcon />,
       loading: usersLoading,
     },
     {
-      label: "Pending Requests",
+      label: "Block Users",
       description: "Blocked users on Outsource Apply",
       value: pendingUserCount,
-      link: "all_staff.html",
+      // link: "all_staff.html",
       color: "text-red-500",
       icon: <CompletedIcon />,
       loading: usersLoading,
@@ -313,35 +313,39 @@ const AllUsers = () => {
     {
       title: "Status",
       dataIndex: "status",
-      render: (text, record) => (
-        <label
-          className={
-            text === "REJECTED"
-              ? "bg-red-100 text-red-600 text-xs font-medium px-4 py-0.5 rounded-full border border-red-500"
-              : text === "PENDING"
-              ? "bg-orange-100 text-red-500 text-xs font-medium px-4 py-0.5 rounded-full border border-red-400"
-              : text === "active"
-              ? "bg-green-100 text-green-800 text-xs font-medium px-4 py-0.5 rounded-full border border-green-500"
-              : text === "IN REVIEW"
-              ? "bg-blue-100 text-blue-600 text-xs font-medium px-4 py-0.5 rounded-full border border-blue-500"
-              : "bg-blue-100 text-blue-600 text-xs font-medium px-4 py-0.5 rounded-full border border-blue-500"
-          }
-        >
-          {text.charAt(0).toUpperCase() + text.slice(1)}
-        </label>
-      ),
+      render: (text, record) => {
+        // Replace "suspended" with "blocked" for display
+        const displayStatus = text === "suspended" ? "blocked" : text;
+        return (
+          <label
+            className={
+              text === "suspended"
+                ? "bg-red-100 text-red-600 text-xs font-medium px-4 py-0.5 rounded-full border border-red-500"
+                : text === "pending"
+                ? "bg-orange-100 text-red-500 text-xs font-medium px-4 py-0.5 rounded-full border border-red-400"
+                : text === "active"
+                ? "bg-green-100 text-green-800 text-xs font-medium px-4 py-0.5 rounded-full border border-green-500"
+                : text === "IN REVIEW"
+                ? "bg-blue-100 text-blue-600 text-xs font-medium px-4 py-0.5 rounded-full border border-blue-500"
+                : "bg-blue-100 text-blue-600 text-xs font-medium px-4 py-0.5 rounded-full border border-blue-500"
+            }
+          >
+            {displayStatus.charAt(0).toUpperCase() + displayStatus.slice(1)}
+          </label>
+        );
+      },
     },
     {
       title: "Action",
       render: (text, record) => {
-        const isDisabled = !canBlockUser && !canRestoreUser; // Disable if both are false
-        // console.log("Disabled", isDisabled);
-        console.log("Disabledtt", canBlockUser);
-        console.log("Disabledttgg", canRestoreUser);
+        const isDisabled = !canBlockUser;
         const buttonStyles = isDisabled
           ? "bg-gray-400 cursor-not-allowed"
-          : "bg-red-500 hover:bg-red-600"; // Change color if disabled
-    
+          : "bg-red-500 hover:bg-red-600";
+        
+        // Hide the block/unblock button if status is "pending"
+        const showBlockButton = record.status !== "pending";
+  
         return (
           <div className="flex items-center justify-start">
             <button
@@ -350,14 +354,16 @@ const AllUsers = () => {
             >
               <ViewIcon />
             </button>
-    
-            <button
-              className={`${buttonStyles} text-white font-medium rounded me-2 items-center justify-center flex px-2 py-2`}
-              onClick={() => handleButtonClick(record.id)}
-              disabled={isDisabled} // Disable button
-            >
-              {record.status === "active" ? <StopOutlined /> : <RollbackOutlined />}
-            </button>
+  
+            {showBlockButton && (
+              <button
+                className={`${buttonStyles} text-white font-medium rounded me-2 items-center justify-center flex px-2 py-2`}
+                onClick={() => handleButtonClick(record.id)}
+                disabled={isDisabled}
+              >
+                {record.status === "active" ? <StopOutlined /> : <RollbackOutlined />}
+              </button>
+            )}
           </div>
         );
       },
@@ -370,7 +376,7 @@ const AllUsers = () => {
       className="bg-black text-white border border-gray-700 rounded-lg"
       onClick={({ key }) => handleStatusChange(key)}
     >
-      {["All", "active", "pending", "inactive"].map((item) => (
+      {["All", "active", "suspended"].map((item) => (
         <Menu.Item key={item} className="hover:bg-gray-800 text-white">
           {item.charAt(0).toUpperCase() + item.slice(1)}
         </Menu.Item>
@@ -379,13 +385,13 @@ const AllUsers = () => {
   );
 
   return (
-    <div className="flex">
+    <div className="flex dark:text-black">
       <Navbar />
       <Sidebar />
       <div className="px-8 py-8 sm:ml-64 bg-gray-50 w-full h-full">
         <main className="rounded-lg mt-14 mb-12l">
           <div className="mb-12">
-            <h1 className="mb-1 text-xl font-bold">ALL OUTSOURCE-APPLY USERS</h1>
+            <h1 className="mb-1 text-xl font-bold">ALL OUTSOURCE APPLY USERS</h1>
           </div>
 
           <div className="w-full rounded-lg mb-12">
@@ -459,22 +465,22 @@ const AllUsers = () => {
             <Modal
               title={
                 selectedUser?.status === "active"
-                  ? "Suspend User"
-                  : "Reactivate User"
+                  ? "Block User"
+                  : "Unblock User"
               }
               open={isModalOpen}
               onOk={handleConfirm}
               onCancel={handleCancel}
               okText={
-                selectedUser?.status === "active" ? "Suspend" : "Reactivate"
+                selectedUser?.status === "active" ? "Block" : "Unblock"
               }
               cancelText="Cancel"
               confirmLoading={confirmLoading} // Use the appropriate loading state
             >
               <p>
                 {selectedUser?.status === "active"
-                  ? "Are you sure you want to suspend this user?"
-                  : "Are you sure you want to reactivate this user?"}
+                  ? "Are you sure you want to block this user?"
+                  : "Are you sure you want to unblock this user?"}
               </p>
             </Modal>
           </div>

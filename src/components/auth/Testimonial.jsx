@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 
-import bongisImg from "../../assets/images/bottle.png"; // Adjust the relative path
-import jideImg from "../../assets/images/jide.jpeg";   // Adjust the relative path
+import bongisImg from "../../assets/images/bongis.png"; // Adjust the relative path
+import jideImg from "../../assets/images/woman.jpg";   // Adjust the relative path
 
 export default function TestimonialCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -9,18 +9,18 @@ export default function TestimonialCarousel() {
   const testimonials = [
     {
       id: 0,
-      heading: "Outsource Apply unlocked my Potential",
-      text: "The simplicity of the lectures from the contents in Outsource Apply made learning easier for me, and I just continued learning more and more!",
-      name: "Enoobong George",
-      role: "Senior UI/UX Designer @Apple",
+      heading: "Landed My Dream Job in Just Two Weeks!",
+      text: "I was struggling to land interviews despite having years of experience. After using their CV and cover letter service, I saw an immediate difference. Within two weeks, I received multiple interview invitations, and I finally secured my dream job! Their team truly knows how to make a CV stand out",
+      name: "Michael A.",
+      role: "Marketing Manager",
       image: bongisImg,
     },
     {
       id: 1,
-      heading: "I learned a complex topic in 3 weeks!",
-      text: "There's this difficult topic I've been struggling to learn from other places, but Outsource Apply's videos helped simplify the daunting task, and I learned it in under 3 weeks!",
-      name: "Olajide Punk Palmer",
-      role: "Senior Backend Engineer @Nottingham Forest",
+      heading: "They Took the Stress Out of Job Applications!",
+      text: "Applying for jobs used to feel overwhelming, but this service changed everything. They crafted a professional CV and cover letter for me and even handled the job applications on my behalf. In no time, I landed a great role in my field. Highly recommend!",
+      name: "Sarah O.",
+      role: "Data Analyst",
       image: jideImg,
     },
   ];

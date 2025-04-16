@@ -8,11 +8,11 @@ const PrivacyPolicy = () => {
     <Navbar />
       <div
         id="main-content"
-        className="h-full bg-white mb-5 relative overflow-auto"
+        className="h-full bg-white mb-5 relative overflow-auto dark:text-black"
         style={{ top: "65px" }}
       >
         {/* Hero Section */}
-        <section className="bg-white lg:h-screen flex items-center hero_bg fading_edge p-8 py-24 ">
+        <section className="bg-white pt-40 flex items-center hero_bg fading_edge p-8 py-24">
         <div class="mx-auto max-w-screen-xl">
                 <div class="max-w-2xl mb-8 text-5xl font-bold tracking-tight leading-none text-center">
                     <p class="font-DMSerifDisplay-bold tracking-wide dark:text-black">
@@ -20,7 +20,7 @@ const PrivacyPolicy = () => {
                     </p>
                 </div>
 
-                <p class="font-normal text-gray-900 font-Archivo text-md flex justify-center">
+                <p class="font-normal text-gray-900 font-Archivo text-md flex justify-center mb-12">
                     <span class="font-normal max-w-2xl text-center">
                         We're here to help! Reach us by email at team@outsourceapply.com for any queries or concerns.
                     </span>

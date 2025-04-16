@@ -3,8 +3,9 @@ import Modal from "react-modal";
 import CustomInput from "../CustomRequestInput";
 import Spacer from "../../utils/Spacer";
 import { toast } from "sonner";
-import { useUpdateStaffMutation } from "../../services/apiSlice"
+import { useUpdateStaffMutation } from "../../services/apiSlice";
 import CustomLoadingButton from "../CustomLoadingButton";
+import { Select } from "antd"; // Import Ant Design Select
 
 const modalStyles = {
   overlay: {
@@ -29,6 +30,9 @@ const modalStyles = {
 Modal.setAppElement("#root");
 
 const EditStaffModal = ({ isOpen, onClose, staffInfo }) => {
+  const userInformation = JSON.parse(sessionStorage.getItem("userInformation")) || {};
+  const currentUserRole = userInformation?.profile?.role || "";
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -60,23 +64,23 @@ const EditStaffModal = ({ isOpen, onClose, staffInfo }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleRoleChange = (value) => {
+    setFormData((prev) => ({ ...prev, role: value }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Ensure username has the required suffix
     const finalUsername = formData.staffEmail.includes("@outsourceapply.com")
       ? formData.staffEmail
       : `${formData.staffEmail}@outsourceapply.com`;
 
-    // Prepare the payload with only the required fields
     const payload = {
       email: formData.email,
       phone: formData.phone,
       staffEmail: formData.staffEmail,
       role: formData.role,
     };
-
-    console.log("Submitting payload:", payload);
 
     try {
       const response = await updateStaffRequest(payload).unwrap();
@@ -91,13 +95,34 @@ const EditStaffModal = ({ isOpen, onClose, staffInfo }) => {
     }
   };
 
+  const isRoleDisabled = staffInfo?.role === "super_admin" && currentUserRole !== "super_admin";
+
+  const getRoleOptions = () => {
+    switch(currentUserRole) {
+      case "super_admin":
+        return [
+          { value: "super_admin", label: "Super Admin" },
+          { value: "admin", label: "Admin" },
+          { value: "staff", label: "Staff" }
+        ];
+      case "admin":
+        return [
+          { value: "admin", label: "Admin" },
+          { value: "staff", label: "Staff" }
+        ];
+      default:
+        return [];
+    }
+  };
+
+  const roleOptions = getRoleOptions();
+
   return (
     <Modal isOpen={isOpen} onRequestClose={onClose} style={modalStyles}>
-      <div className="bg-white rounded-lg shadow overflow-hidden flex flex-col">
-        {/* Modal header */}
+      <div className="bg-white rounded-lg shadow overflow-hidden flex flex-col dark:text-black">
         <div className="flex items-center justify-between p-4 md:p-5 border-b">
           <h3 className="text-xl font-medium text-gray-900">
-            New Staff Request
+            Edit Staff Information
           </h3>
           <button
             type="button"
@@ -123,7 +148,6 @@ const EditStaffModal = ({ isOpen, onClose, staffInfo }) => {
           </button>
         </div>
 
-        {/* Modal body */}
         <div className="modal-body overflow-y-auto max-h-96 p-6">
           <form className="max-w-full" onSubmit={handleSubmit}>
             <CustomInput
@@ -132,7 +156,7 @@ const EditStaffModal = ({ isOpen, onClose, staffInfo }) => {
               value={formData.firstName}
               onChange={handleInputChange}
               placeholder="Enter Firstname"
-              // disabled={formData.firstName}
+              disabled={formData.firstName}
             />
             <Spacer size="24px" />
 
@@ -142,29 +166,9 @@ const EditStaffModal = ({ isOpen, onClose, staffInfo }) => {
               value={formData.lastName}
               onChange={handleInputChange}
               placeholder="Enter Lastname"
-              // disabled={formData.lastName}
+              disabled={formData.lastName}
             />
             <Spacer size="24px" />
-
-            {/* <CustomInput
-              label="Email Address"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              placeholder="Enter an email address"
-              disabled={formData.email}
-            />
-            <Spacer size="24px" /> */}
-
-            {/* <CustomInput
-              label="Username"
-              name="username"
-              value={formData.username}
-              onChange={handleInputChange}
-              placeholder="Enter username"
-              disabled={formData.username}
-            />
-            <Spacer size="24px" /> */}
 
             <CustomInput
               type="text"
@@ -173,19 +177,9 @@ const EditStaffModal = ({ isOpen, onClose, staffInfo }) => {
               value={formData.staffEmail}
               onChange={handleInputChange}
               placeholder="Enter your Staff Email Address"
-              // disabled={formData.staffEmail}
+              disabled={formData.staffEmail}
             />
             <Spacer size="24px" />
-
-            {/* <CustomInput
-              label="Password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleInputChange}
-              placeholder="Enter a password"
-            /> */}
-            {/* <Spacer size="24px" /> */}
 
             <CustomInput
               label="Phone Number"
@@ -193,45 +187,32 @@ const EditStaffModal = ({ isOpen, onClose, staffInfo }) => {
               value={formData.phone}
               onChange={handleInputChange}
               placeholder="Enter a Phone Number"
-              // disabled={formData.phone}
+              disabled={formData.phone}
             />
             <Spacer size="24px" />
 
             <div className="mb-8 max-w-md">
-              <label
-                htmlFor="staff_role"
-                className="block mb-2 text-sm font-medium text-gray-900"
-              >
+              <label className="block mb-2 text-sm font-medium text-gray-900">
                 Staff Role
               </label>
-              <select
-                id="role"
-                name="role"
-                value={formData.role}
-                onChange={handleInputChange}
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-              >
-                <option value="">Choose a Role</option>
-                {/* <option value="">Choose a Role</option> */}
-                <option value="super_admin">Super-Admin</option>{" "}
-                {/* Full name */}
-                <option value="admin">Admin</option> {/* Full name */}
-                <option value="staff">Staff</option>
-              </select>
+              <Select
+                placeholder="Select a role"
+                value={formData.role || undefined}
+                onChange={handleRoleChange}
+                options={roleOptions}
+                disabled={isRoleDisabled}
+                className="w-full"
+              />
+              {isRoleDisabled && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Only a Super Admin can modify this role.
+                </p>
+              )}
             </div>
           </form>
         </div>
 
-        {/* Modal footer */}
         <div className="flex justify-center p-4">
-          {/* <button
-            type="submit"
-            className="py-2 px-16 rounded text-sm text-white bg-purple-700 hover:bg-purple-600"
-            disabled={isLoading}
-            onClick={handleSubmit}
-          >
-            {isLoading ? "Submitting..." : "Update Staff"}
-          </button> */}
           <CustomLoadingButton isLoading={isLoading} onClick={handleSubmit}>
             Update Staff Information
           </CustomLoadingButton>

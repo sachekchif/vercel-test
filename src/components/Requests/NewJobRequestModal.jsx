@@ -144,6 +144,8 @@ const NewJobRequestModal = ({ isOpen, onClose, profile, job }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("ttmmm");
+    
 
     // Check if user is on Basic plan and has exceeded request limit
     const userInfo = JSON.parse(sessionStorage.getItem("userInformation"));
@@ -232,6 +234,8 @@ const NewJobRequestModal = ({ isOpen, onClose, profile, job }) => {
 
     try {
       const response = await createRequest(payload).unwrap();
+      console.log("ttuu", response);
+      
       if (response?.statusCode === "00") {
         message.success("Request has been created successfully");
         localStorage.removeItem("selectedJob");

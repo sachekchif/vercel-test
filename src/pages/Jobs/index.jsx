@@ -15,6 +15,7 @@ import { FcBriefcase } from "react-icons/fc";
 import NewJobReqModal from "../../components/Requests/NewJobRequestModal";
 import EmptyState from "../../assets/images/magnifier-with-path.svg";
 import { Link, useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 
 const JobsPage = () => {
   const jobRefs = useRef({});
@@ -50,31 +51,33 @@ const JobsPage = () => {
   }, [jobsData]);
 
   const handleApplyFilters = () => {
-  if (!filteredJobs.length) return;
+    if (!filteredJobs.length) return;
 
-  const filtered = filteredJobs.filter((job) => {
-    return (
-      (!filters.title ||
-        job.cleaned_job_title.toLowerCase().includes(filters.title.toLowerCase())) &&
-      (!filters.location ||
-        job.city.toLowerCase().includes(filters.location.toLowerCase())) &&
-      (!filters.company ||
-        job.company.toLowerCase().includes(filters.company.toLowerCase()))
-    );
-  });
+    const filtered = filteredJobs.filter((job) => {
+      return (
+        (!filters.title ||
+          job.cleaned_job_title
+            .toLowerCase()
+            .includes(filters.title.toLowerCase())) &&
+        (!filters.location ||
+          job.city.toLowerCase().includes(filters.location.toLowerCase())) &&
+        (!filters.company ||
+          job.company.toLowerCase().includes(filters.company.toLowerCase()))
+      );
+    });
 
-  setFilteredJobs(filtered);
-  
-  // Show message if no results after filtering
-  if (filtered.length === 0) {
-    message.info("No jobs match your filters. Try different criteria.");
-    setFilters({ title: "", location: "", company: "" });
-    setFilteredJobs(jobsData);
-    setIsModalOpen(false); // Keep modal open
-  }
-  
-  setIsModalOpen(false);
-};
+    setFilteredJobs(filtered);
+
+    // Show message if no results after filtering
+    if (filtered.length === 0) {
+      message.info("No jobs match your filters. Try different criteria.");
+      setFilters({ title: "", location: "", company: "" });
+      setFilteredJobs(jobsData);
+      setIsModalOpen(false); // Keep modal open
+    }
+
+    setIsModalOpen(false);
+  };
 
   // 🔹 Reset Filters
   const handleResetFilters = () => {
@@ -88,7 +91,7 @@ const JobsPage = () => {
     if (filteredJobs.length === 0) {
       setFilters({ title: "", location: "", company: "" });
       setFilteredJobs(jobsData);
-    // setIsModalOpen(false);
+      // setIsModalOpen(false);
     }
     setIsModalOpen(false);
   };
@@ -254,6 +257,52 @@ const JobsPage = () => {
 
   return (
     <div className="">
+      <Helmet>
+        <title>
+          Jobs Listings | Find & Apply Easily – OutsourceApply
+        </title>
+        <meta
+          name="description"
+          content="Browse 10,000+ remote jobs updated daily. Filter by role, salary, or location—apply in one click and get hired faster."
+        />
+        <meta
+          name="keywords"
+          content="  
+remote job listings, latest remote jobs, work from home job board,  
+remote jobs by category, remote jobs by salary, remote jobs by location,  
+remote tech jobs, remote marketing jobs, remote customer support jobs,  
+no-experience remote jobs, entry-level remote jobs, freelance job board,  
+remote job search, find remote work, apply for remote jobs,  
+best remote job sites, remote job aggregator, remote job alerts"
+        />
+        <meta
+          property="og:title"
+          content="10,000+ Remote Jobs – Get Hired, With Ease"
+        />
+        <meta
+          property="og:description"
+          content="Find your perfect remote job fast. Filter by skills, pay, or flexibility—no endless scrolling."
+        />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://www.outsourceapply.com/jobs" />
+        <meta
+          property="og:image"
+          content="https://www.outsourceapply.com/assets/og-all-jobs.jpg"
+        />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content="Browse Remote Jobs | OutsourceApply"
+        />
+        <meta
+          name="twitter:description"
+          content="Your next remote job is waiting. Search, apply, and get hired—all in one place."
+        />
+        <meta
+          name="twitter:image"
+          content="https://www.outsourceapply.com/assets/tw-all-jobs.jpg"
+        />
+      </Helmet>
       <Navbar />
       <div className="flex gap-6 p-6 bg-gray-100 pt-24 px-24 min-h-screen dark:text-black">
         {/* 🔹 Sidebar */}

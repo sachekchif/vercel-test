@@ -497,7 +497,7 @@ const AdminRequest = () => {
   );
 
   return (
-    <div className="flex">
+    <div className="flex dark:text-black">
       <Navbar />
       <Sidebar />
       <div className="px-8 py-8 sm:ml-64 bg-gray-50 w-full h-full">

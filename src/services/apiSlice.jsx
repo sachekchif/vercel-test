@@ -220,6 +220,14 @@ export const apiSlice = createApi({
     "Admin",
   ],
   endpoints: (builder) => ({
+    getActivityLogs: builder.query({
+      query: ({ page = 1, limit = 10 }) => ({
+        url: `/admin/fetch-activity-log`,
+        params: { page, limit }
+      }),
+      // Removed transformResponse to see raw data
+      providesTags: ['Activities'],
+    }),
     fetchPosts: builder.query({
       query: ({ limit = 10 }) => {
         console.log("Fetching posts with limit:", limit); // Debug
@@ -444,6 +452,14 @@ export const apiSlice = createApi({
       },
       invalidatesTags: ["Admin"], // Invalidate the Users cache to refresh the data
     }),
+    updatePermissionsByRole: builder.mutation({
+      query: (permissionsData) => ({
+        url: "/admin/update-permissions-by-role",
+        method: "POST",
+        body: permissionsData,
+      }),
+      invalidatesTags: ['Admin'],
+    }),
 
     // Strip
     fetchPlans: builder.query({
@@ -621,6 +637,7 @@ export const apiSlice = createApi({
 });
 
 export const {
+  useGetActivityLogsQuery,
   useFetchPostsQuery,
   useFetchPostByIdQuery,
   useCreatePostMutation,
@@ -646,6 +663,7 @@ export const {
   useUpdateUserStatusToSuspendedMutation,
   useUpdateUserStatusToActiveMutation,
   useGetStaffByRoleMutation,
+  useUpdatePermissionsByRoleMutation,
 
   // Profile
   useUpdateProfileMutation,

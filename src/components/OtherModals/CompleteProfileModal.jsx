@@ -15,19 +15,19 @@ const CompleteProfileModal = ({ isVisible, onCancel, onCompleteProfile }) => {
       }
       visible={isVisible}
       onCancel={onCancel}
-      footer={
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <Button
-            key="complete"
-            type="primary"
-            danger // Use danger type for red button
-            onClick={onCompleteProfile}
-            style={{ borderRadius: "5px", fontWeight: "500" }}
-          >
-            Complete Profile
-          </Button>
-        </div>
-      }
+      // footer={
+      //   <div style={{ display: "flex", justifyContent: "center" }}>
+      //     <Button
+      //       key="complete"
+      //       type="primary"
+      //       danger // Use danger type for red button
+      //       onClick={onCompleteProfile}
+      //       style={{ borderRadius: "5px", fontWeight: "500" }}
+      //     >
+      //       Complete Profile
+      //     </Button>
+      //   </div>
+      // }
       bodyStyle={{ padding: "16px", textAlign: "center" }}
       style={{ borderRadius: "8px", maxWidth: "400px" }} // Smaller modal
     >

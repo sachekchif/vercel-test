@@ -1,66 +1,315 @@
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Home from '../pages/Home';
-import Login from '../pages/auth/login';
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from "react-router-dom";
+import { lazy, Suspense } from "react";
+import Loader from "../components/Loader";
 import "../styles/globals.css";
-import Signup from '../pages/auth/signin';
-import Dashboard from '../pages/Dashboard';
-import AdminDashboard from '../pages/AdminDashboard';
-import AllRequests from '../pages/AllRequests';
-import Profile from '../pages/Profile';
-import RecoveryPassword from '../pages/auth/ResetPassword';
-import ForgotPForm from '../components/auth/ForgotPForm';
-import ForgotPassword from '../pages/auth/forgotPassword';
-import RecoveryEmail from '../pages/auth/recoveryEmail';
-import ResetPassword from '../pages/auth/ResetPassword';
-import AllUsers from '../pages/AllUsers/Index';
-import Checkout from '../pages/Checkout';
-import Pricing from '../pages/Pricing';
-import AllStaff from '../pages/AllStaff';
-import VerifyEmail from '../pages/auth/VerifyEmail';
-import SuccessPage from '../pages/auth/VerifyEmail/SuccessPage';
-import About from '../pages/About';
-import JobsPage from '../pages/Jobs';
-import SearchJobsPage from '../pages/Jobs/test-2';
-import Activities from '../pages/Activities';
-import PendingRequest from '../pages/PendingRequest';
-import TermsOfUse from '../pages/Terms and conditions';
-import PrivacyPolicy from '../pages/Privacy';
-import Services from '../pages/Services';
-import AdminRequest from '../pages/AdminRequest';
-import NotFound from '../pages/NotFound';
-// import About from '../pages/About/About';
-// import Contact from '../pages/Contact/Contact';
+
+// Lazy-loaded components remain the same...
+const Home = lazy(() => import("../pages/Home"));
+const Login = lazy(() => import("../pages/auth/login"));
+const Signup = lazy(() => import("../pages/auth/signin"));
+const Dashboard = lazy(() => import("../pages/Dashboard"));
+const AdminDashboard = lazy(() => import("../pages/AdminDashboard"));
+const AllRequests = lazy(() => import("../pages/AllRequests"));
+const Profile = lazy(() => import("../pages/Profile"));
+const ForgotPassword = lazy(() => import("../pages/auth/forgotPassword"));
+const RecoveryEmail = lazy(() => import("../pages/auth/recoveryEmail"));
+const ResetPassword = lazy(() => import("../pages/auth/ResetPassword"));
+const AllUsers = lazy(() => import("../pages/AllUsers/Index"));
+const Checkout = lazy(() => import("../pages/Checkout"));
+const Pricing = lazy(() => import("../pages/Pricing"));
+const AllStaff = lazy(() => import("../pages/AllStaff"));
+const VerifyEmail = lazy(() => import("../pages/auth/VerifyEmail"));
+const SuccessPage = lazy(() => import("../pages/auth/VerifyEmail/SuccessPage"));
+const About = lazy(() => import("../pages/About"));
+const JobsPage = lazy(() => import("../pages/Jobs"));
+const SearchJobsPage = lazy(() => import("../pages/Jobs/test-2"));
+const Activities = lazy(() => import("../pages/Activities"));
+const PendingRequest = lazy(() => import("../pages/PendingRequest"));
+const TermsOfUse = lazy(() => import("../pages/Terms and conditions"));
+const PrivacyPolicy = lazy(() => import("../pages/Privacy"));
+const Services = lazy(() => import("../pages/Services"));
+const AdminRequest = lazy(() => import("../pages/AdminRequest"));
+
+const ProtectedRoute = ({ children, allowedRoles }) => {
+  const userInfo = JSON.parse(sessionStorage.getItem("userInformation"));
+
+  if (!userInfo) {
+    return children; // Allow guests to access
+  }
+
+  if (allowedRoles.includes(userInfo.profile.role)) {
+    return children;
+  }
+
+  // Redirect unauthorized roles
+  switch (userInfo.profile.role) {
+    case "staff":
+    case "admin":
+      return <Navigate to="/admin-dashboard" replace />;
+    case "user":
+    default:
+      return <Navigate to="/dashboard" replace />;
+  }
+};
+
+const PublicRoute = ({ children }) => {
+  const userInfo = JSON.parse(sessionStorage.getItem("userInformation"));
+
+  // Block admin and staff from seeing public routes
+  if (
+    userInfo?.profile?.role === "admin" ||
+    userInfo?.profile?.role === "staff"
+  ) {
+    return <Navigate to="/admin-dashboard" replace />;
+  }
+
+  return children;
+};
+
+const GuestRoute = ({ children }) => {
+  const userInfo = JSON.parse(sessionStorage.getItem("userInformation"));
+
+  if (userInfo) {
+    switch (userInfo.profile.role) {
+      case "staff":
+      case "admin":
+        return <Navigate to="/admin-dashboard" replace />;
+      case "user":
+      default:
+        return <Navigate to="/dashboard" replace />;
+    }
+  }
+
+  return children;
+};
 
 const AppRouter = () => (
   <Router>
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/pricing" element={<Pricing />} />
-      <Route path="/about" element={<About />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/profile" element={<Profile />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/recovery-mail" element={<RecoveryEmail />} />
-      <Route path="/verify-mail" element={<VerifyEmail />} />
-      <Route path="/success-page" element={<SuccessPage />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/alljobs" element={<JobsPage />} />
-      <Route path="/sign-up" element={<Signup />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/activities" element={<Activities />} />
-      <Route path="/admin-dashboard" element={<AdminDashboard />} />
-      <Route path="/all-requests" element={<AllRequests />} />
-      <Route path="/terms" element={<TermsOfUse />} />
-      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-      <Route path="/services" element={<Services />} />
-      <Route path="/ad-all-requests" element={<AdminRequest />} />
-      <Route path="/all-users" element={<AllUsers />} />
-      <Route path="/all-staff" element={<AllStaff />} />
-      <Route path="/checkout/:planType?" element={<Checkout />} />
-      <Route path="/pending-requests" element={<PendingRequest />} />
-      <Route path="/alljobs/:jobTitle" element={<SearchJobsPage />} />
-      <Route path="/*" element={<NotFound />} />
-    </Routes>
+    <Suspense fallback={<Loader />}>
+      <Routes>
+        {/* Public routes - only for guests, users, and super_admins */}
+        <Route
+          path="/"
+          element={
+            <PublicRoute>
+              <Home />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/pricing"
+          element={
+            <PublicRoute>
+              <Pricing />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/about"
+          element={
+            <PublicRoute>
+              <About />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/services"
+          element={
+            <PublicRoute>
+              <Services />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/terms"
+          element={
+            <PublicRoute>
+              <TermsOfUse />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/privacy-policy"
+          element={
+            <PublicRoute>
+              <PrivacyPolicy />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/alljobs"
+          element={
+            <PublicRoute>
+              <JobsPage />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/alljobs/:jobTitle"
+          element={
+            <PublicRoute>
+              <SearchJobsPage />
+            </PublicRoute>
+          }
+        />
+
+        {/* Auth routes - accessible to all but redirects logged-in users */}
+        <Route
+          path="/login"
+          element={
+            <GuestRoute>
+              <Login />
+            </GuestRoute>
+          }
+        />
+        <Route
+          path="/sign-up"
+          element={
+            <GuestRoute>
+              <Signup />
+            </GuestRoute>
+          }
+        />
+        <Route
+          path="/forgot-password"
+          element={
+            <GuestRoute>
+              <ForgotPassword />
+            </GuestRoute>
+          }
+        />
+        <Route
+          path="/recovery-mail"
+          element={
+            <GuestRoute>
+              <RecoveryEmail />
+            </GuestRoute>
+          }
+        />
+        <Route
+          path="/verify-mail"
+          element={
+            <GuestRoute>
+              <VerifyEmail />
+            </GuestRoute>
+          }
+        />
+        <Route
+          path="/success-page"
+          element={
+            <GuestRoute>
+              <SuccessPage />
+            </GuestRoute>
+          }
+        />
+        <Route
+          path="/reset-password"
+          element={
+            <GuestRoute>
+              <ResetPassword />
+            </GuestRoute>
+          }
+        />
+
+        {/* Protected routes remain the same... */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={["user"]}>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute
+              allowedRoles={["user", "staff", "admin", "super_admin"]}
+            >
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/all-requests"
+          element={
+            <ProtectedRoute
+              allowedRoles={["user", "staff", "admin", "super_admin"]}
+            >
+              <AllRequests />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/checkout/:planType?"
+          element={
+            <ProtectedRoute allowedRoles={["user", "super_admin"]}>
+              <Checkout />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Protected routes for staff */}
+        <Route
+          path="/pending-requests"
+          element={
+            <ProtectedRoute allowedRoles={["staff", "admin", "super_admin"]}>
+              <PendingRequest />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/activities"
+          element={
+            <ProtectedRoute allowedRoles={["staff", "admin", "super_admin"]}>
+              <Activities />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Protected routes for admin */}
+        <Route
+          path="/admin-dashboard"
+          element={
+            <ProtectedRoute allowedRoles={["staff", "admin", "super_admin"]}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/all-users"
+          element={
+            <ProtectedRoute allowedRoles={["staff", "admin", "super_admin"]}>
+              <AllUsers />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/all-staff"
+          element={
+            <ProtectedRoute allowedRoles={["staff", "admin", "super_admin"]}>
+              <AllStaff />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ad-all-requests"
+          element={
+            <ProtectedRoute allowedRoles={["staff", "admin", "super_admin"]}>
+              <AdminRequest />
+            </ProtectedRoute>
+          }
+        />
+        {/* Catch-all route */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Suspense>
   </Router>
 );
 

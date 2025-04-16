@@ -10,6 +10,7 @@ import { FcBriefcase } from "react-icons/fc";
 import NewJobReqModal from "../../components/Requests/NewJobRequestModal";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import EmptyState from "../../assets/images/magnifier-with-path.svg";
+import { Helmet } from "react-helmet-async";
 
 const SearchJobsPage = () => {
   const { jobTitle } = useParams();
@@ -200,6 +201,57 @@ const SearchJobsPage = () => {
 
   return (
     <div className="dark:text-black">
+      <Helmet>
+        <title>{jobTitle} | Job – OutsourceApply</title>
+        <meta
+          name="description"
+          content={`Apply now for this ${jobTitle} remote position. signup and get hired with just one click.`}
+        />
+        <meta
+          name="keywords"
+          content={`  
+hire for ${jobTitle}, ${jobTitle} remote job, remote jobs,  
+work from home ${jobTitle} job, apply for ${jobTitle}, remote job openings,  
+urgent remote hiring, quick job application, remote job salary,  
+remote job requirements, high-paying ${jobTitle} jobs`}
+        />
+        <meta
+          property="og:title"
+          content={`Hiring: ${jobTitle} – Get Hired, With Ease`}
+        />
+        <meta
+          property="og:description"
+          content={`This ${jobTitle} role offers . Apply directly and start working remotely in days.`}
+        />
+        <meta property="og:type" content="website" />
+        <meta
+          property="og:url"
+          content={`https://www.outsourceapply.com/jobs/${jobTitle || "job"}`}
+        />
+        <meta
+          property="og:image"
+          content={
+            companyLogo ||
+            "https://www.outsourceapply.com/assets/og-job-default.jpg"
+          }
+        />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content={`Remote Job: ${jobTitle} | OutsourceApply`}
+        />
+        <meta
+          name="twitter:description"
+          content={`Quick apply for this remote ${jobTitle} role. No resume? No problem—get hired fast.`}
+        />
+        <meta
+          name="twitter:image"
+          content={
+            companyLogo ||
+            "https://www.outsourceapply.com/assets/tw-job-default.jpg"
+          }
+        />
+      </Helmet>
       <Navbar />
       <div className="flex gap-6 p-6 bg-gray-100 pt-24 px-24 min-h-screen">
         {/* 🔹 Sidebar */}

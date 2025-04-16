@@ -45,6 +45,7 @@ import NewModalButton from "../../components/Requests/NewRequest.jsx";
 import NewStaffModol from "../../components/Staff/NewStaffModal.jsx";
 import EditRequestModal from "../../components/Requests/EditRequestModal.jsx";
 import NewRequestModal from "../../components/Requests/NewReqModal.jsx";
+import NewJobRequestModal from "../../components/Requests/NewJobRequestModal.jsx";
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
@@ -191,8 +192,8 @@ const AllRequests = () => {
   ).length;
 
   const showDrawer = (id) => {
-    console.log("yyy",id);
-    
+    console.log("yyy", id);
+
     setViewId(id);
     setDrawerIsVisible(true);
   };
@@ -213,7 +214,7 @@ const AllRequests = () => {
       label: "Total Requests",
       description: "Requests you've been making all these while",
       value: totalLength ? totalLength : 0,
-      link: "/all-requests",
+      // link: "/all-requests",
       color: "",
       icon: <TotalReqIcon />,
       loading: isLoading,
@@ -222,7 +223,7 @@ const AllRequests = () => {
       label: "Completed Requests",
       description: "Requests has been reviewed and submitted",
       value: completedData?.length || 0,
-      link: "/all-requests",
+      // link: "/all-requests",
       color: "text-green-500",
       icon: <CompletedIcon />,
       loading: isLoading,
@@ -231,7 +232,7 @@ const AllRequests = () => {
       label: "Pending Requests",
       description: "Requests are still being reviewed",
       value: pendingData?.data?.length || 0,
-      link: "all_staff.html",
+      // link: "all_staff.html",
       color: "text-red-500",
       icon: <PendingIcon />,
       loading: isLoading,
@@ -242,7 +243,9 @@ const AllRequests = () => {
       title: "JOB TITLE",
       dataIndex: "jobTitle",
       render: (text, record) => (
-        <p className="table-avatar font-bold">{text !== null ? text : "null"}</p>
+        <p className="table-avatar font-bold">
+          {text !== null ? text : "null"}
+        </p>
       ),
     },
 
@@ -259,7 +262,11 @@ const AllRequests = () => {
     {
       title: "Application Date",
       dataIndex: "logdate",
-      render: (text, record) => <p className="table-avatar font-medium">{getDate(text !== null ? text : "null")}</p>,
+      render: (text, record) => (
+        <p className="table-avatar font-medium">
+          {getDate(text !== null ? text : "null")}
+        </p>
+      ),
     },
     {
       title: "Status",
@@ -358,7 +365,7 @@ const AllRequests = () => {
                 {/* New Request Button */}
                 <NewModalButton
                   buttonText="New Request"
-                  ModalComponent={NewRequestModal}
+                  ModalComponent={NewJobRequestModal}
                 />
                 <Dropdown overlay={menu} trigger={["click"]}>
                   <Button className="w-full !py-5 bg-gray-900 text-white !border-black hover:!text-white hover:!border-black hover:!bg-gray-800 flex items-center justify-between">
@@ -393,17 +400,17 @@ const AllRequests = () => {
           </div>
 
           <AccountDetailsDrawer
-              isVisible={drawerIsVisible}
-              onClose={closeDrawer}
-              user={userData} // Pass the user data to the drawer
-              isLoading={userLoading} // Pass loading state to show skeleton
-              error={userError} // Pass error
-            />
-            <EditRequestModal
-              isOpen={editModalVisible}
-              onClose={() => setEditModalVisible(false)}
-              profile={userData}
-            />
+            isVisible={drawerIsVisible}
+            onClose={closeDrawer}
+            user={userData} // Pass the user data to the drawer
+            isLoading={userLoading} // Pass loading state to show skeleton
+            error={userError} // Pass error
+          />
+          <EditRequestModal
+            isOpen={editModalVisible}
+            onClose={() => setEditModalVisible(false)}
+            profile={userData}
+          />
         </main>
       </div>
     </div>

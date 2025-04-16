@@ -3,20 +3,6 @@ import { useNavigate } from "react-router-dom";
 
 // src/utils/PermissionsService.js
 
-const userInformation =
-  JSON.parse(sessionStorage.getItem("userInformation")) || {};
-const permissions = userInformation?.profile?.permissions || {};
-
-// Dynamically create and export variables for each permission
-export const canAccessTransactions = permissions?.canAccessTransactions;
-export const canDeleteUser = permissions?.canDeleteUser;
-export const canBlockUser = permissions?.canBlockUser;
-export const canRestoreUser = permissions?.canRestoreUser;
-export const canAddStaff = permissions?.canAddStaff;
-export const canUpdateStaffRole = permissions?.canUpdateStaffRole;
-export const canBlockStaff = permissions?.canBlockStaff;
-export const canRestoreStaff = permissions?.canRestoreStaff;
-
 export const convertToBase64 = (file) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -565,6 +551,7 @@ export const ProfileIcon = () => (
     />
   </svg>
 );
+
 
 export const ReportsIcon = () => (
   <svg

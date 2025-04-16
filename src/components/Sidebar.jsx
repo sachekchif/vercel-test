@@ -98,6 +98,7 @@ const Sidebar = () => {
       {
         title: "PROFILE",
         items: [
+          { label: "Activities", href: "/activities", icon: <ActivitiesIcon /> },
           { label: "Profile", href: "/profile", icon: <ProfileIcon /> },
           { label: "Sign Out", href: "/login", icon: <LogoutIcon /> },
         ],
@@ -134,6 +135,7 @@ const Sidebar = () => {
       {
         title: "PROFILE",
         items: [
+          { label: "Activities", href: "/activities", icon: <ActivitiesIcon /> },
           { label: "Profile", href: "/profile", icon: <ProfileIcon /> },
           { label: "Sign Out", href: "/login", icon: <LogoutIcon /> },
         ],
@@ -165,6 +167,7 @@ const Sidebar = () => {
       {
         title: "PROFILE",
         items: [
+          { label: "Activities", href: "/activities", icon: <ActivitiesIcon /> },
           { label: "Profile", href: "/profile", icon: <ProfileIcon /> },
           { label: "Sign Out", href: "/login", icon: <LogoutIcon /> },
         ],

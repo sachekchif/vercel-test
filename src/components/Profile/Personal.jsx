@@ -6,7 +6,7 @@ import {
   UploadOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom"; // For navigation
+import { useNavigate } from "react-router-dom";
 import SectionLabel from "./Personal/SectionLabel";
 import FormSection from "./Personal/FormSection";
 import AccountManagement from "./Personal/AccountManagement";
@@ -18,8 +18,6 @@ import { toast } from "sonner";
 
 const cleanBase64 = (base64String) => {
   if (!base64String || typeof base64String !== "string") return null;
-
-  // Remove duplicate prefixes
   return base64String.replace(
     /^data:image\/(png|jpg|jpeg);base64,data:image\/(png|jpg|jpeg);base64,/,
     "data:image/jpeg;base64,"
@@ -33,13 +31,16 @@ const Personal = () => {
     useUpdateProfileMutation();
   const [profileImageData, setProfileImageData] = useState(null);
   const [formSectionData, setFormSectionData] = useState({});
-  const navigate = useNavigate(); // For navigation
+  const navigate = useNavigate();
 
   const rawProfilePic =
     profileImageData ||
     data?.profile?.otherProfileDetails?.[0]?.profilePic ||
     null;
   const profilePic = cleanBase64(rawProfilePic);
+
+  // Check if user role is not "user"
+  const shouldHideAccountManagement = data?.profile?.role !== "user";
 
   const handleFileChange = async (event) => {
     if (event.target.files) {
@@ -53,8 +54,8 @@ const Personal = () => {
           const canvas = document.createElement("canvas");
           const ctx = canvas.getContext("2d");
 
-          const maxWidth = 500; // Limit width
-          const maxHeight = 500; // Limit height
+          const maxWidth = 500;
+          const maxHeight = 500;
           let { width, height } = img;
 
           if (width > maxWidth || height > maxHeight) {
@@ -67,8 +68,7 @@ const Personal = () => {
           canvas.height = height;
           ctx.drawImage(img, 0, 0, width, height);
 
-          // Convert to Base64
-          const compressedBase64 = canvas.toDataURL("image/jpeg", 0.7); // Reduce quality to 70%
+          const compressedBase64 = canvas.toDataURL("image/jpeg", 0.7);
           setProfileImageData(compressedBase64);
         };
       };
@@ -87,14 +87,11 @@ const Personal = () => {
       jobTitle: formSectionData.jobTitle,
       gender: formSectionData.gender,
       dateOfBirth: formSectionData.dateOfBirth,
-      currentCv: formSectionData.cvFile, // Get CV file from formSectionData
+      currentCv: formSectionData.cvFile,
     };
-
-    console.log("payload: ", passableData);
 
     try {
       const response = await updateProfile(passableData).unwrap();
-      console.log("Updated Profile Response:", response);
       if (response.statusCode !== "00") {
         message.error(response.statusMessage || "Failed to update profile.");
         return;
@@ -110,7 +107,6 @@ const Personal = () => {
   const handleViewCv = () => {
     const cvUrl = data?.profile?.otherProfileDetails?.[0]?.currentCv;
     if (cvUrl) {
-      // Navigate to a new page to view the CV
       navigate("/view-cv", { state: { cvUrl } });
     } else {
       message.error("No CV found!");
@@ -137,12 +133,12 @@ const Personal = () => {
             <div className="flex items-center mx-6 xl:justify-center justify-start">
               <label
                 className={`cursor-pointer xl:mb-0 mb-3 w-[180px] flex flex-col font-semibold border-2 rounded-xl xl:w-full py-2 px-4 md:mb-0 group text-center
-        ${
-          isEditing
-            ? "text-primaryColor border-primaryColor"
-            : "text-gray-500 border-gray-500 bg-gray-200 cursor-not-allowed"
-        }
-      `}
+                  ${
+                    isEditing
+                      ? "text-primaryColor border-primaryColor"
+                      : "text-gray-500 border-gray-500 bg-gray-200 cursor-not-allowed"
+                  }
+                `}
               >
                 <div className="h-full w-full text-center gap-2 flex items-center">
                   <MdOutlineMonochromePhotos className="text-[22px]" />
@@ -153,7 +149,7 @@ const Personal = () => {
                   accept="image/*"
                   onChange={handleFileChange}
                   className="hidden"
-                  disabled={!isEditing} // Disables file input
+                  disabled={!isEditing}
                 />
               </label>
             </div>
@@ -168,47 +164,49 @@ const Personal = () => {
           <FormSection
             data={data}
             isEditing={isEditing}
-            onFormSave={setFormSectionData} // Pass the form data including CV file
+            onFormSave={setFormSectionData}
           />
 
           {/* Edit & Save Buttons */}
-<div className="flex space-x-4 mt-4">
-  {!isEditing && !updateLoading && ( // Hide Edit button when editing or loading
-    <button
-      type="button"
-      onClick={handleEditClick}
-      className="text-white bg-blue-600 hover:bg-blue-500 font-medium rounded-lg text-sm px-4 py-2"
-    >
-      Edit
-    </button>
-  )}
+          <div className="flex space-x-4 mt-4">
+            {!isEditing && !updateLoading && (
+              <button
+                type="button"
+                onClick={handleEditClick}
+                className="text-white bg-blue-600 hover:bg-blue-500 font-medium rounded-lg text-sm px-4 py-2"
+              >
+                Edit
+              </button>
+            )}
 
-  {(isEditing || updateLoading) && ( // Show Save button when editing or loading
-    <button
-      type="button"
-      onClick={handleSaveClick}
-      disabled={updateLoading} // Disable button when loading
-      className={`font-medium rounded-lg text-sm px-4 py-2 flex items-center gap-2 
-        ${
-          updateLoading
-            ? "bg-gray-400 cursor-not-allowed text-gray-700"
-            : "bg-green-600 hover:bg-green-500 text-white"
-        }
-      `}
-    >
-      {updateLoading ? (
-        <Spin
-          indicator={<LoadingOutlined style={{ fontSize: 16 }} spin />}
-        />
-      ) : (
-        "Save Changes"
-      )}
-    </button>
-  )}
-</div>
+            {(isEditing || updateLoading) && (
+              <button
+                type="button"
+                onClick={handleSaveClick}
+                disabled={updateLoading}
+                className={`font-medium rounded-lg text-sm px-4 py-2 flex items-center gap-2 
+                  ${
+                    updateLoading
+                      ? "bg-gray-400 cursor-not-allowed text-gray-700"
+                      : "bg-green-600 hover:bg-green-500 text-white"
+                  }
+                `}
+              >
+                {updateLoading ? (
+                  <Spin
+                    indicator={<LoadingOutlined style={{ fontSize: 16 }} spin />}
+                  />
+                ) : (
+                  "Save Changes"
+                )}
+              </button>
+            )}
+          </div>
         </div>
       </div>
-      <AccountManagement />
+      
+      {/* Conditionally render AccountManagement */}
+      {!shouldHideAccountManagement && <AccountManagement />}
     </div>
   );
 };
